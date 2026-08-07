@@ -3757,13 +3757,13 @@ namespace PDEWebAPIS.Services
                     //,{ 10, "generatedInwardNoCount" }
                 };
 
-                IQueryable<ApplicationDTL> query = context.applicationDTL;
+                IQueryable<ApplicationDTL> query = context.applicationDTL.Where(a => a.status.Equals(10) && a.inwardno != "NA");
 
                 // All regions
                 if (regionCode == "0" && districtCode == "0" && officeCode == "0")
                 {
                     var regionActualCounts = query
-                        .GroupBy(a => a.status >= 1 && a.status <= 9 ? 0 : a.status)
+                        .GroupBy(a => a.status == 10 ? 0 : a.status)
                         .Select(g => new
                         {
                             StatusCode = g.Key,
@@ -3823,7 +3823,7 @@ namespace PDEWebAPIS.Services
                 }
 
                 var actualCounts = query
-                    .GroupBy(a => a.status >= 1 && a.status <= 9 ? 0 : a.status)
+                    .GroupBy(a => a.status == 10 ? 0 : a.status)
                     .Select(g => new
                     {
                         StatusCode = g.Key,
