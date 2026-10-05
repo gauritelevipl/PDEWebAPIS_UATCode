@@ -508,6 +508,7 @@ namespace PDEWebAPIS.Controllers
         //
 
         //[Authorize]
+        //[Authorize]
         [HttpPost]
         [Route("getOwnerNameInfo")]
         public async Task<string> getOwnerNameInfo([FromBody] string val)
@@ -544,18 +545,43 @@ namespace PDEWebAPIS.Controllers
                 _logger.LogInformation("Get Owner Name Details Request Data - " + requestcts);
                 var response = await epcisServices.getOwnerNameInfo(requestcts, _logger);
                 _logger.LogInformation("Get Owner Name Details Resonse - " + response);
-                if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
+                string[] parts = response.Split("$");
+
+                if (parts.Length > 1 && int.TryParse(parts[1], out int statusCode))
                 {
-                    //_logger.LogInformation("IGR DIG List Resonse - " + response.Split("-")[0]);
-                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get CTS Details Data Found", response.Split("|")[0]))));
+                    if (statusCode >= 200 && statusCode <= 299)
+                    {
+                        _logger.LogInformation($"Owner Name Data Found: {parts[0]}");
+                        //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Found", parts[0])));
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Found", parts[0]))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        _logger.LogInformation($"Owner Name Not Data Found: {parts[0]}");
+                        //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Not Found", parts[0])));
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Not Found", parts[0]))));
+                    }
                 }
                 else
                 {
                     type = ReponseType.NotFound;
-                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, response.Split("|")[0], ""))));
-                    //return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "माहिती उपलब्ध नाही, कृपया संबंधित कार्यालयाशी संपर्क साधा", response.Split("|")[0]))));
-                    //return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get CTS Details Data Not Found", response.Split("|")[0]))));
+                    _logger.LogInformation($"Owner Not Data Found: {parts[0]}");
+                    //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Not Found", parts[0])));
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Not Found", parts[0]))));
                 }
+                /*   if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
+                   {
+                       //_logger.LogInformation("IGR DIG List Resonse - " + response.Split("-")[0]);
+                       return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get CTS Details Data Found", response.Split("|")[0]))));
+                   }
+                   else
+                   {
+                       type = ReponseType.NotFound;
+                       return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, response.Split("|")[0], ""))));
+                       //return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "माहिती उपलब्ध नाही, कृपया संबंधित कार्यालयाशी संपर्क साधा", response.Split("|")[0]))));
+                       //return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get CTS Details Data Not Found", response.Split("|")[0]))));
+                   }*/
             }
             catch (Exception ex)
             {

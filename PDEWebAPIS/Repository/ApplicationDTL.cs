@@ -52,5 +52,7 @@ namespace PDEWebAPIS.Repository
         public string? errorcorrectionids { get; set; }
         public string? namechangeids { get; set; }
         public string? witnessids { get; set; }
+        //Below code added on 05 Oct 26
+        public string? declarationentryids { get; set; }
     }
 }

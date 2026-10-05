@@ -27462,5 +27462,115 @@ namespace PDEWebAPIS.Services
                 throw new HandleException(ex.Message.ToString());
             }
         }
+
+        // Below code added on 05 Oct 26
+        public string SaveDeclarationEntryInfoData(DeclarationEntryInfoInputModel inputData)
+        {
+            DeclarationEntryInfo dbTable = new DeclarationEntryInfo();
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            string FolderPath = @"D:\WWW\MUTATIONDOCS\" + inputData.applicationid + @"\DECLARATIONDOC";
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    if (Convert.ToInt32(inputData.userDetails!.userType!) == 11)
+                    {
+                        if (string.IsNullOrEmpty(inputData.ghoshnaPatraDetails!.approvingAuthorityOther))
+                        {
+                            return "Please Enter संस्थेचे नांव in (मराठी मध्ये)";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inputData.ghoshnaPatraDetails!.approvingAuthorityOther))
+                        {
+                            return "संस्थेचे नांव (मराठी मध्ये) Field contains English Letter / special characters!";
+                        }
+                    }
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationid!)!;
+
+                    //Assign Data to Table fields to insert new records
+                    dbTable.userMaster = userMaster;
+                    dbTable.applicationDTL = applicationDTL;
+                    dbTable.type_of_authority_approving_the_construction_plan_code = Convert.ToInt32(inputData.userDetails.userType);
+                    dbTable.type_of_authority_approving_the_construction_plan = inputData.userDetails.userTypeLabel;
+                    dbTable.company_name = (Convert.ToInt32(inputData.userDetails!.userType!) == 11) ? inputData.ghoshnaPatraDetails!.approvingAuthorityOther : "NA";
+                    dbTable.map_approval_order_no = inputData.ghoshnaPatraDetails!.mapApprovalOrderNo;
+                    dbTable.map_approval_order_date = inputData.ghoshnaPatraDetails!.mapApprovalOrderDate;
+                    dbTable.construction_start_cert_no = inputData.ghoshnaPatraDetails!.constructionStartCertNo;
+                    dbTable.construction_start_cert_date = inputData.ghoshnaPatraDetails!.constructionStartCertDate;
+                    dbTable.occupancy_certificate_file_name = "NA";
+                    dbTable.occupancy_certificate_file_path = "NA";
+                    dbTable.occupancy_certificate_date = inputData.ghoshnaPatraDetails!.occupancyCertDate;
+                    _context.declarationEntryInfos.Add(dbTable);
+                    _context.SaveChanges();
+
+                    //Get Saved Row ID
+                    int rowid = (int)dbTable.declarationid!;
+
+                    var DocUploadStatus = "fail";
+                    string docname = System.IO.Path.GetFileNameWithoutExtension(inputData.ghoshnaPatraDetails!.occupancyCertNo!.name!);
+
+                    if (methodForFile.ContainsSpecialCharacters(docname))
+                    {
+                        return inputData.ghoshnaPatraDetails!.occupancyCertNo!.name! + " File name contains special Characters";
+                    }
+                    else
+                    {
+                        DocUploadStatus = methodForFile.ConvertBase64ToPdf(FolderPath + @"\" + +rowid + @"\", inputData.ghoshnaPatraDetails!.occupancyCertNo!.name!, inputData.ghoshnaPatraDetails!.occupancyCertNo!.src!);
+                    }
+                    if (DocUploadStatus == "Success")
+                    {
+                        dbTable.occupancy_certificate_file_name = inputData.ghoshnaPatraDetails!.occupancyCertNo!.name;
+                        dbTable.occupancy_certificate_file_path = FolderPath + @"\" + +rowid + @"\" + inputData.ghoshnaPatraDetails!.occupancyCertNo!.name!;
+                        _context.SaveChanges();
+
+                        /*// Below code is added to store Document Uploaded Details.
+                        UploadedDocumentsDTL docdbTable = new UploadedDocumentsDTL();
+                        docdbTable.userMaster = userMaster;
+                        docdbTable.applicationDTL = applicationDTL;
+                        docdbTable.document_type_code = "26";
+                        docdbTable.document_type = "मुळ मृत्यू दाखला";
+                        docdbTable.document_name = inputData.ghoshnaPatraDetails!.occupancyCertNo.name;
+                        docdbTable.document_path = FolderPath + @"\" + +rowid + @"\"+ inputData.ghoshnaPatraDetails!.occupancyCertNo!.name!;
+                        _context.uploadedDocumentsDTLs.Add(docdbTable);
+                        _context.SaveChanges();
+                        int uploadedDocID = docdbTable.uploaded_doc_id;
+                        if (applicationDTLdata != null)
+                        {
+                            if (!string.IsNullOrEmpty(applicationDTLdata.uploadedDocIDs) && !applicationDTLdata.uploadedDocIDs.Contains(uploadedDocID.ToString()))
+                            {
+                                applicationDTLdata.uploadedDocIDs = applicationDTLdata.uploadedDocIDs + "," + uploadedDocID.ToString();
+                            }
+                            else
+                            {
+                                applicationDTLdata.uploadedDocIDs = uploadedDocID.ToString();
+                            }
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        }
+                        _context.SaveChanges();*/
+                    }
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationid)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.declarationentryids) && !applicationDTLdata.declarationentryids.Contains(rowid.ToString()))
+                        {
+                            applicationDTLdata.declarationentryids = applicationDTLdata.declarationentryids + "," + rowid.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.declarationentryids = rowid.ToString();
+                        }
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
     }
 }

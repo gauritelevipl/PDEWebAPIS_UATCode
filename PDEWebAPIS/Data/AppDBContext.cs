@@ -500,6 +500,20 @@ namespace PDEWebAPIS.Data
             modelBuilder.Entity<WitnessDTL>()
          .Property(b => b.deleteddate)
          .HasDefaultValueSql("1900-01-01");
+
+            //Below code added on 05 Oct 26
+            modelBuilder.Entity<DeclarationEntryInfo>()
+              .Property(b => b.company_name)
+              .HasDefaultValue("NA");
+            modelBuilder.Entity<DeclarationEntryInfo>()
+       .Property(b => b.createddatetime)
+       .HasDefaultValueSql("current_timestamp");
+            modelBuilder.Entity<DeclarationEntryInfo>()
+          .Property(b => b.isDeleted)
+          .HasDefaultValue(false);
+            modelBuilder.Entity<DeclarationEntryInfo>()
+         .Property(b => b.deleteddate)
+         .HasDefaultValueSql("1900-01-01");
         }
 
         public DbSet<PropertyTypeMaster> propertyTypes { get; set; }
@@ -546,5 +560,7 @@ namespace PDEWebAPIS.Data
         public DbSet<ErrorCorrectionInformation> errorCorrectionInformation { get; set; }
         public DbSet<NameChangeDTL> nameChangeDTLs { get; set; }
         public DbSet<WitnessDTL> witnessDTLs { get; set; }
+        public DbSet<DeclarationEntryInfo> declarationEntryInfos { get; set; }
+
     }
 }

@@ -7775,5 +7775,75 @@ namespace PDEWebAPIS.Controllers
                 }
             }
         }
+
+
+        // Below code added on 05 Oct 26
+        //Ghoshanapatra
+        //[Authorize]
+        [HttpPost]
+        [Route("SaveDeclarationEntry")]
+        public string SaveDeclarationEntry(DeclarationEntryInfoInputModel inputData)
+        //[FromBody] string val)
+        {
+            try
+            {
+                int UserID = 277;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                /* if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                 {
+                     // we have a valid AuthenticationHeaderValue that has the following details:
+                     var scheme = headerValue.Scheme;
+                     var Token = headerValue.Parameter;
+                     UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                     // scheme will be "Bearer"
+                     // parmameter will be the token itself.
+                 }*/
+                ReponseType type = ReponseType.Success;
+                //bool check = true;
+                //check = Security.IsBase64String(val);
+                //if (!check)
+                //{
+                //    type = ReponseType.Failure;
+                //    _logger.LogInformation("Save Ghoshanapatra - Inout String Is Not Encrypted");
+                //    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                //}
+                //var decrypted = Security.DeCryptData(val);
+                //DeclarationEntryInfoInputModel inputData = JsonConvert.DeserializeObject<DeclarationEntryInfoInputModel>(decrypted!)!;
+                //_logger.LogInformation("Save Ghoshanapatra Request Data - " + decrypted);
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveDeclarationEntryInfoData(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationid!, "Save Ghoshanapatra Nond Form", CallAPIForFlag);
+                    return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Ghoshanapatra Nond is Saved Successfully", "")));
+                    //return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Ghoshanapatra Nond is Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Ghoshanapatra Nond Response Failed - " + Response);
+                    return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, "")));
+                    //return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Save Ghoshanapatra Nond Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString())));
+                    //return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
     }
 }
