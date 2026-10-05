@@ -546,5 +546,6 @@ namespace PDEWebAPIS.Data
         public DbSet<ErrorCorrectionInformation> errorCorrectionInformation { get; set; }
         public DbSet<NameChangeDTL> nameChangeDTLs { get; set; }
         public DbSet<WitnessDTL> witnessDTLs { get; set; }
+        
     }
 }

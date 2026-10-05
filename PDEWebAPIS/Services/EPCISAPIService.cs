@@ -185,7 +185,7 @@ namespace PDEWebAPIS.Services
                                         //_logger.LogInformation("body check in get villege by office: " + body);
                                         return decrypted + "$VIPL" + (int)response.StatusCode;
                                     }
-                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                     {
                                         return decrypted + "$" + (int)response.StatusCode;
                                     }
@@ -202,7 +202,7 @@ namespace PDEWebAPIS.Services
                                     {
                                         return "Data Not Found" + "$VIPL" + "400";
                                     }
-                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                     {
                                         return "Data Not Found" + "$" + "400";
                                     }
@@ -220,14 +220,14 @@ namespace PDEWebAPIS.Services
                                 {
                                     return jsonObject!.message! + "$VIPL" + jsonObject!.Status;
                                 }
-                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                 {
                                     return jsonObject!.message! + "$" + jsonObject!.Status;
                                 }
-                                else if (urlMethod == "getOwnerNameInfo")
+                               /* else if (urlMethod == "getOwnerNameInfo")
                                 {
                                     return jsonObject!.message! + "|" + jsonObject!.Status;
-                                }
+                                }*/
                                 else
                                 {
                                     return jsonObject!.message! + "|" + jsonObject!.Status;
@@ -242,7 +242,7 @@ namespace PDEWebAPIS.Services
                                 {
                                     return "Data Not Found" + "$VIPL" + "400";
                                 }
-                                if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                 {
                                     return "Data Not Found" + "$" + "400";
                                 }
@@ -258,7 +258,7 @@ namespace PDEWebAPIS.Services
                                     return "Invalid Response" + "$VIPL" + "400";
 
                                 }
-                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                 {
                                     return "Invalid Response" + "$" + "400";
 
@@ -282,7 +282,7 @@ namespace PDEWebAPIS.Services
                         {
                             return "Data Not Found" + "$VIPL" + "400";
                         }
-                        else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                        else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                         {
                             return "Data Not Found" + "$" + "400";
                         }
@@ -315,7 +315,7 @@ namespace PDEWebAPIS.Services
             {
                 return "Data Not Found" + "$VIPL" + "400";
             }
-            else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+            else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
             {
                 return "Data Not Found" + "$" + "400";
             }
@@ -600,14 +600,26 @@ namespace PDEWebAPIS.Services
 
         public async Task<string> getOwnerNameInfo(RequestOwnerNameInfo body, ILogger _logger)
         {
-            /*var body = new Dictionary<string, string>();
-            body.Add("mut_type", mut_type);*/
             string response = await SendRequestAsync("getOwnerNameInfo", HttpMethod.Post, _logger, body);
-            if (response.Split("|")[1] == "200")
+            if (response.Split("$")[1] == "200")
             {
-                var districts = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("|")[0]);
-                return JsonConvert.SerializeObject(districts) + "|" + response.Split("|")[1];
+                if (response.Split("$")[0] != null && response.Split("$")[0].ToList().Count > 0)
+                {
+
+                    var regions = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("$")[0]);
+                    _logger.LogInformation("Owner Data: " + regions);
+                    return JsonConvert.SerializeObject(regions) + "$" + response.Split("$")[1];
+                }
+                else
+                {
+                    return "Owner Name List is Empty" + "$" + response.Split("$")[1];
+                }
             }
+            //if (response.Split("|")[1] == "200")
+            //{
+            //    var districts = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("|")[0]);
+            //    return JsonConvert.SerializeObject(districts) + "|" + response.Split("|")[1];
+            //}
             else return response;
             //return response;
 
@@ -3740,7 +3752,6 @@ namespace PDEWebAPIS.Services
             else return response;
             //return response;
         }
-
         public async Task<Dictionary<string, int>?> FetchDashboardMetricsData(GetApplicationCountForNewDashboardInput inputData)
         {
             try
@@ -3763,7 +3774,7 @@ namespace PDEWebAPIS.Services
                 if (regionCode == "0" && districtCode == "0" && officeCode == "0")
                 {
                     var regionActualCounts = query
-                        .GroupBy(a => a.status >= 1 && a.status <= 9 ? 0 : a.status)
+                        .GroupBy(a => a.status ==10 ? 0 : a.status)
                         .Select(g => new
                         {
                             StatusCode = g.Key,
@@ -3847,5 +3858,112 @@ namespace PDEWebAPIS.Services
                 throw new HandleException($"Fetch failed: {ex.Message}");
             }
         }
+
+        //public async Task<Dictionary<string, int>?> FetchDashboardMetricsData(GetApplicationCountForNewDashboardInput inputData)
+        //{
+        //    try
+        //    {
+        //        string regionCode = inputData.region_code!;
+        //        string districtCode = inputData.district_code!;
+        //        string officeCode = inputData.office_code!;
+
+        //        Dictionary<string, int> result = new Dictionary<string, int>();
+
+        //        var expectedStatusCodes = new Dictionary<int, string>
+        //        {
+        //            { 0, "createdApplicationCount" }
+        //            //,{ 10, "generatedInwardNoCount" }
+        //        };
+
+        //        IQueryable<ApplicationDTL> query = context.applicationDTL.Where(a => a.status.Equals(10) && a.inwardno != "NA");
+
+        //        // All regions
+        //        if (regionCode == "0" && districtCode == "0" && officeCode == "0")
+        //        {
+        //            var regionActualCounts = query
+        //                .GroupBy(a => a.status == 10 ? 0 : a.status)
+        //                .Select(g => new
+        //                {
+        //                    StatusCode = g.Key,
+        //                    Count = g.Count()
+        //                })
+        //                .ToList();
+
+        //            result = expectedStatusCodes
+        //                .Select(kvp =>
+        //                {
+        //                    var count = regionActualCounts.FirstOrDefault(a => a.StatusCode == kvp.Key)?.Count ?? 0;
+        //                    var key = kvp.Value.Replace(" ", "_").Replace("/", "_").Replace("-", "_").Replace(",", "");
+        //                    return new KeyValuePair<string, int>(key, count);
+        //                })
+        //                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        //            result.Add("total", result.Values.Sum());
+        //            return result;
+        //        }
+        //        // Specific region (with all districts & offices)
+        //        else if (regionCode != "0" && districtCode == "0" && officeCode == "0")
+        //        {
+        //            var districtsData = await GetDistrictByRegion(Convert.ToInt32(regionCode), _logger);
+        //            var parts = districtsData.Split('$');
+        //            if (parts.Length != 2 || !int.TryParse(parts[1], out int statusCode) || statusCode != 200)
+        //                return null;
+
+        //            var districtList = JsonConvert.DeserializeObject<List<EPCIDistrictByRegionList>>(parts[0]);
+        //            var districtCodes = districtList!
+        //            .Select(d =>
+        //            {
+        //                int code = d.district_code;
+        //                return code <= 9 ? "0" + code.ToString() : code.ToString();
+        //            })
+        //            .ToList();
+        //            query = query.Where(s => districtCodes.Contains(s.district_code!));
+        //        }
+        //        else if (regionCode == "0" && districtCode != "0" && officeCode == "0")
+        //        {
+        //            if (Convert.ToInt32(districtCode) <= 9)
+        //            {
+        //                districtCode = "0" + districtCode;
+        //            }
+        //            query = query.Where(s => s.district_code == districtCode);
+        //        }
+        //        else if (regionCode == "0" && districtCode == "0" && officeCode != "0")
+        //        {
+        //            //if (Convert.ToInt32(districtCode) <= 9)
+        //            //{
+        //            //    districtCode = "0" + districtCode;
+        //            //}
+        //            //query = query.Where(s => s.district_code == districtCode && s.office_code == officeCode);
+        //            query = query.Where(s => s.office_code == officeCode);
+        //        }
+        //        else
+        //        {
+        //            return null;
+        //        }
+
+        //        var actualCounts = query
+        //            .GroupBy(a => a.status == 10 ? 0 : a.status)
+        //            .Select(g => new
+        //            {
+        //                StatusCode = g.Key,
+        //                Count = g.Count()
+        //            })
+        //            .ToList();
+
+        //        result = expectedStatusCodes
+        //           .Select(kvp =>
+        //           {
+        //               var count = actualCounts.FirstOrDefault(a => a.StatusCode == kvp.Key)?.Count ?? 0;
+        //               var key = kvp.Value.Replace(" ", "_").Replace("/", "_").Replace("-", "_").Replace(",", "");
+        //               return new KeyValuePair<string, int>(key, count);
+        //           })
+        //           .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        //        result.Add("total", result.Values.Sum());
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new HandleException($"Fetch failed: {ex.Message}");
+        //    }
+        //}
     }
 }

@@ -266,7 +266,8 @@ builder.Services.AddSingleton<TokenBlacklistService>();
 builder.Services.AddSingleton<TokenBlacklistForGrievanceService>();
 
 //hangfire
-builder.Services.AddScoped<ScheduledJobs>();
+//Swara Commented on 05 Oct 26
+//builder.Services.AddScoped<ScheduledJobs>();
 
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen(options =>
@@ -404,12 +405,12 @@ app.MapControllers().RequireRateLimiting("fixed");
 //Days	*	Every day
 //Months	*	Every month
 //Weekdays	*	Every day of the week
-var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
-recurringJobManager.AddOrUpdate<ScheduledJobs>(
-    "resubmit-applications",
-    service => service.ResubmitApplication(), //=> Console.WriteLine("Hangfire job executed"),
-    //"*/10 * * * *");                             //                                              Cron.Daily(23));
-Cron.Hourly);
+//var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+//recurringJobManager.AddOrUpdate<ScheduledJobs>(
+//    "resubmit-applications",
+//    service => service.ResubmitApplication(), //=> Console.WriteLine("Hangfire job executed"),
+//                                              //"*/10 * * * *");                             //                                              Cron.Daily(23));
+//Cron.Hourly);
 //"0 0,8 * * *");//
 //"*/5 * * * *") ;
 

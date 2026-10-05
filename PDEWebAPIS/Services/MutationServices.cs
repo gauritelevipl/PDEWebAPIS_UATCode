@@ -27292,7 +27292,7 @@ namespace PDEWebAPIS.Services
                 fetchData.userType = KharedinondInformation.user_type;
 
                 fetchData.mobileNo = KharedinondInformation.mobileno;
-               
+
                 //isMHDetails
                 isMHPropertyForVataniPatraNondTaker isMHproperty = new isMHPropertyForVataniPatraNondTaker();
                 isMHproperty.hasProperty = KharedinondInformation.has_property;
@@ -27462,5 +27462,7 @@ namespace PDEWebAPIS.Services
                 throw new HandleException(ex.Message.ToString());
             }
         }
+
+       
     }
 }
