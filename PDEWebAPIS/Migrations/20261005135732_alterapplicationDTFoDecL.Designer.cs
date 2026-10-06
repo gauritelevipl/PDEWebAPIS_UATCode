@@ -12,8 +12,8 @@ using PDEWebAPIS.Data;
 namespace PDEWebAPIS.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20260702090054_createWitnessTBL")]
-    partial class createWitnessTBL
+    [Migration("20261005135732_alterapplicationDTFoDecL")]
+    partial class alterapplicationDTFoDecL
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -279,6 +279,9 @@ namespace PDEWebAPIS.Migrations
                         .HasDefaultValueSql("current_timestamp");
 
                     b.Property<string>("dastIDs")
+                        .HasColumnType("text");
+
+                    b.Property<string>("declarationentryids")
                         .HasColumnType("text");
 
                     b.Property<DateOnly>("deleteddate")
@@ -698,6 +701,76 @@ namespace PDEWebAPIS.Migrations
                     b.HasIndex("userMasteruserid");
 
                     b.ToTable("dast_information");
+                });
+
+            modelBuilder.Entity("PDEWebAPIS.Repository.DeclarationEntryInfo", b =>
+                {
+                    b.Property<int>("declarationid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("declarationid"));
+
+                    b.Property<string>("applicationDTLapplicationid")
+                        .HasColumnType("text");
+
+                    b.Property<string>("company_name")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("construction_start_cert_date")
+                        .HasColumnType("text");
+
+                    b.Property<string>("construction_start_cert_no")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("createddatetime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<DateOnly>("deleteddate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasDefaultValueSql("1900-01-01");
+
+                    b.Property<bool>("isDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("map_approval_order_date")
+                        .HasColumnType("text");
+
+                    b.Property<string>("map_approval_order_no")
+                        .HasColumnType("text");
+
+                    b.Property<string>("occupancy_certificate_date")
+                        .HasColumnType("text");
+
+                    b.Property<string>("occupancy_certificate_file_name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("occupancy_certificate_file_path")
+                        .HasColumnType("text");
+
+                    b.Property<string>("type_of_authority_approving_the_construction_plan")
+                        .HasColumnType("text");
+
+                    b.Property<int>("type_of_authority_approving_the_construction_plan_code")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("userMasteruserid")
+                        .HasColumnType("integer");
+
+                    b.HasKey("declarationid");
+
+                    b.HasIndex("applicationDTLapplicationid");
+
+                    b.HasIndex("userMasteruserid");
+
+                    b.ToTable("declaration_entry_info");
                 });
 
             modelBuilder.Entity("PDEWebAPIS.Repository.DocumentTypeMaster", b =>
@@ -3152,7 +3225,9 @@ namespace PDEWebAPIS.Migrations
                         .HasDefaultValueSql("current_timestamp");
 
                     b.Property<DateOnly>("deleteddate")
-                        .HasColumnType("date");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasDefaultValueSql("1900-01-01");
 
                     b.Property<string>("district")
                         .HasColumnType("text");
@@ -3427,6 +3502,21 @@ namespace PDEWebAPIS.Migrations
                 });
 
             modelBuilder.Entity("PDEWebAPIS.Repository.DastInformation", b =>
+                {
+                    b.HasOne("PDEWebAPIS.Repository.ApplicationDTL", "applicationDTL")
+                        .WithMany()
+                        .HasForeignKey("applicationDTLapplicationid");
+
+                    b.HasOne("PDEWebAPIS.Repository.UserMaster", "userMaster")
+                        .WithMany()
+                        .HasForeignKey("userMasteruserid");
+
+                    b.Navigation("applicationDTL");
+
+                    b.Navigation("userMaster");
+                });
+
+            modelBuilder.Entity("PDEWebAPIS.Repository.DeclarationEntryInfo", b =>
                 {
                     b.HasOne("PDEWebAPIS.Repository.ApplicationDTL", "applicationDTL")
                         .WithMany()

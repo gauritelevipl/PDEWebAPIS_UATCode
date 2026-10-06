@@ -33,6 +33,12 @@
         public int? WitnessInfoId { get; set; }
         public string? applicationid { set; get; }
     }
+
+    public class DeleteDeclarationData
+    {
+        public int? declarationid { set; get; }
+        public string? applicationid { set; get; }
+    }
 }
 
      

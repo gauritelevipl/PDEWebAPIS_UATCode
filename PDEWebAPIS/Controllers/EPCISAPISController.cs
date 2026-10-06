@@ -508,6 +508,7 @@ namespace PDEWebAPIS.Controllers
         //
 
         //[Authorize]
+        //[Authorize]
         [HttpPost]
         [Route("getOwnerNameInfo")]
         public async Task<string> getOwnerNameInfo([FromBody] string val)
@@ -2821,7 +2822,8 @@ namespace PDEWebAPIS.Controllers
 
         [HttpPost]
         [Route("getDashboardMetrics")]
-        public async Task<string> getDashboardMetrics([FromBody] string val)
+        public async Task<string> getDashboardMetrics(
+        [FromBody] string val)
         //EPCISgetDashboardMetricsRequestData requestData)
         {
             try
