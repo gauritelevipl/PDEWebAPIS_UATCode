@@ -17230,6 +17230,7 @@ namespace PDEWebAPIS.Services
             List<FetchMayatDetailsData> fetchmayatinfoList = new List<FetchMayatDetailsData>();
             List<FetchMrutuDakhalaDetailsData> fetchMrutyuDetails = new List<FetchMrutuDakhalaDetailsData>();
             List<FetchVarasNondDetailsData> fetchvarasNondList = new List<FetchVarasNondDetailsData>();
+            List<FetchDeclarationEntryData> fetchDeclarationList = new List<FetchDeclarationEntryData>();
             if (applicationDTL!.mutation_type_code == "01")
             {
                 if (!string.IsNullOrEmpty(applicationDTL.mayatIDs))
@@ -17284,6 +17285,8 @@ namespace PDEWebAPIS.Services
             //Hibanama
             List<FetchHibanamaWitnessInfoData> fetchHibanamaWitnessInfoDataList = new List<FetchHibanamaWitnessInfoData>();
 
+            // Ghoshanapatra Nond Info Data
+            List<FetchDeclarationEntryData> fetchDeclarationEntryInfoDataList = new List<FetchDeclarationEntryData>();
             /*application.mayatData = fetchmayatinfoList;
             application.mrutuDakhalaDetailsData = fetchMrutyuDetails;
             application.varasNondDetailsData = fetchvarasNondList;*/
@@ -17384,9 +17387,13 @@ namespace PDEWebAPIS.Services
                         }
                     }
                 }
+            } //घोषणापत्र नोंद
+            else if (applicationDTL.mutation_type_code == "11")
+            {
+                mutationgivertype = "घोषणापत्र नोंद";
+                mutationtakertype = "";
             }
             application.fetchHibanamaWitnessInfoDataList = fetchHibanamaWitnessInfoDataList;
-
             //Mutation Giver 
             List<dynamic> giver = mutationgiverData(applicationDTL);
             //Mutation Taker
@@ -17997,6 +18004,28 @@ namespace PDEWebAPIS.Services
                     }
                 }
             }
+            // Ghoshanapatra Nond
+            else if (applicationDTL.mutation_type_code == "11")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.declarationentryids))
+                {
+                    string[] declarationIds = applicationDTL.declarationentryids.Split(",");
+
+                    if (declarationIds.Length > 0)
+                    {
+                        for (int i = 0; i < declarationIds.Length; i++)
+                        {
+                            FetchDeclarationEntryData fetchDeclarationEntryData = new FetchDeclarationEntryData();
+                            fetchDeclarationEntryData = FetchDeclarationEntryData(Convert.ToInt32(declarationIds[i]));
+                            if (fetchDeclarationEntryData != null)
+                            {
+                                mutationgiver.Add(fetchDeclarationEntryData);
+                            }
+                        }
+                    }
+                }
+            }
             return mutationgiver;
         }
         public List<dynamic> mutationtakerData(ApplicationDTL applicationDTL)
@@ -18201,6 +18230,11 @@ namespace PDEWebAPIS.Services
                         }
                     }
                 }
+            }
+            // Ghoshanapatra Nond
+            else if (applicationDTL.mutation_type_code == "11")
+            {
+                mutationtaker = null;
             }
             return mutationtaker;
         }
