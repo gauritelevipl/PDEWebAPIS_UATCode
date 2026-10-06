@@ -27292,7 +27292,7 @@ namespace PDEWebAPIS.Services
                 fetchData.userType = KharedinondInformation.user_type;
 
                 fetchData.mobileNo = KharedinondInformation.mobileno;
-               
+
                 //isMHDetails
                 isMHPropertyForVataniPatraNondTaker isMHproperty = new isMHPropertyForVataniPatraNondTaker();
                 isMHproperty.hasProperty = KharedinondInformation.has_property;
@@ -27565,6 +27565,101 @@ namespace PDEWebAPIS.Services
                     }
                     scope.Complete();
                     return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchDeclarationEntryData FetchDeclarationEntryData(int declarationid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                DeclarationEntryInfo dbdata = new DeclarationEntryInfo();
+                dbdata = _context.declarationEntryInfos.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.declarationid.Equals(declarationid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchDeclarationEntryData fetchData = new FetchDeclarationEntryData();
+                fetchData.declarationid = dbdata.declarationid;
+                fetchData.userid = dbdata.userMaster!.userid;
+                fetchData.applicationid = dbdata.applicationDTL!.applicationid;
+
+                UserDetailsForDeclarationEntry userDetails = new UserDetailsForDeclarationEntry();
+                userDetails.userType = (dbdata.type_of_authority_approving_the_construction_plan_code).ToString();
+                userDetails.userTypeLabel = dbdata.type_of_authority_approving_the_construction_plan;
+                fetchData.userDetails = userDetails;
+
+                GhoshanaPatraDetails ghoshnaPatraDetails = new GhoshanaPatraDetails();
+                ghoshnaPatraDetails.approvingAuthorityOther = dbdata.company_name;
+                ghoshnaPatraDetails.mapApprovalOrderNo = dbdata.map_approval_order_no;
+                ghoshnaPatraDetails.mapApprovalOrderDate = dbdata.map_approval_order_date;
+                ghoshnaPatraDetails.constructionStartCertNo = dbdata.construction_start_cert_no;
+                ghoshnaPatraDetails.constructionStartCertDate = dbdata.construction_start_cert_date;
+
+                OccupancyCertInfo occupancyCertNo = new OccupancyCertInfo();
+                occupancyCertNo.name = dbdata.occupancy_certificate_file_name;
+
+
+                if (System.IO.File.Exists(dbdata.occupancy_certificate_file_path))
+                {
+                    //File
+                    Byte[] fileBytes = File.ReadAllBytes(dbdata.occupancy_certificate_file_path!);
+                    string FileExt = Path.GetExtension(dbdata.occupancy_certificate_file_path)!;
+                    var content = Convert.ToBase64String(fileBytes);
+                    occupancyCertNo.src = string.IsNullOrEmpty(content) ? "NA" : "data:pdf/" + FileExt.Replace(".", "") + ";base64," + content;
+                }
+
+                ghoshnaPatraDetails.occupancyCertNo = occupancyCertNo;
+                ghoshnaPatraDetails.occupancyCertDate = dbdata.occupancy_certificate_date;
+                fetchData.ghoshnaPatraDetails = ghoshnaPatraDetails;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteDeclarationEntryData(DeleteDeclarationData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    MethodForFileUpload methodForFileUpload = new MethodForFileUpload();
+                    var entity = _context.declarationEntryInfos.FirstOrDefault(s => s.declarationid == deleteMutation.declarationid! && s.isDeleted == false)!;
+                    if (entity != null)
+                    {
+                        entity.isDeleted = true;
+                        entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                        _context.declarationEntryInfos.Attach(entity);
+                        _context.SaveChanges();
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string declarationentryids = applicationDTLdata.declarationentryids!;
+                            string[] mutationids = declarationentryids.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.declarationid.ToString());
+
+                            methodForFileUpload.PermanatlyDeleteFile(entity.occupancy_certificate_file_path!);
+
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.declarationentryids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+
+                            var checkUpdatedIds = mutationids.Where(id => id != deleteMutation.declarationid.ToString()).ToArray();
+                        }
+                        scope.Complete();
+                        methodForFileUpload.PermanatlyDeleteFile(entity.occupancy_certificate_file_path!);
+                        var path = @"D:\WWW\MUTATIONDOCS\" + deleteMutation.applicationid + @"\DECLARATIONDOC\" + deleteMutation.declarationid;
+                        bool isDeleted = methodForFileUpload.PermanatlyDeleteFile(path);
+                        return "Success";
+                    }
+                    else { return "False"; }
                 }
                 catch (Exception ex)
                 {

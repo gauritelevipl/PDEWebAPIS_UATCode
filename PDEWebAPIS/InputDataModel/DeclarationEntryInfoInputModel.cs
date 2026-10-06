@@ -28,4 +28,13 @@
         public string? name {  get; set; }
         public string? src { get; set; }
     }
+
+    public class FetchDeclarationEntryData
+    {
+        public int declarationid { get; set; }
+        public string? applicationid { get; set; }
+        public int userid { get; set; }
+        public UserDetailsForDeclarationEntry? userDetails { get; set; }
+        public GhoshanaPatraDetails? ghoshnaPatraDetails { get; set; }
+    }
 }
