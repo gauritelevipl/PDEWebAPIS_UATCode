@@ -10,19 +10,19 @@ namespace PDEWebAPIS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+           /* migrationBuilder.AddColumn<string>(
                 name: "declarationentryids",
                 table: "applicationdtl",
                 type: "text",
-                nullable: true);
+                nullable: true);*/
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+           /* migrationBuilder.DropColumn(
                 name: "declarationentryids",
-                table: "applicationdtl");
+                table: "applicationdtl");*/
         }
     }
 }

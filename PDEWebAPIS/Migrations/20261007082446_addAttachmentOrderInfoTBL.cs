@@ -12,13 +12,13 @@ namespace PDEWebAPIS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+            /*migrationBuilder.AddColumn<string>(
                 name: "attachmentorderids",
                 table: "applicationdtl",
                 type: "text",
-                nullable: true);
+                nullable: true);*/
 
-            migrationBuilder.CreateTable(
+          /*  migrationBuilder.CreateTable(
                 name: "attachment_order_info",
                 columns: table => new
                 {
@@ -69,18 +69,18 @@ namespace PDEWebAPIS.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_attachment_order_info_userMasteruserid",
                 table: "attachment_order_info",
-                column: "userMasteruserid");
+                column: "userMasteruserid");*/
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "attachment_order_info");
+            /*migrationBuilder.DropTable(
+                name: "attachment_order_info");*/
 
-            migrationBuilder.DropColumn(
-                name: "attachmentorderids",
-                table: "applicationdtl");
+            //migrationBuilder.DropColumn(
+            //    name: "attachmentorderids",
+            //    table: "applicationdtl");
         }
     }
 }

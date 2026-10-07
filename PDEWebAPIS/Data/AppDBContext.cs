@@ -537,6 +537,9 @@ namespace PDEWebAPIS.Data
            .Property(b => b.orbiter_order_date)
            .HasDefaultValue("NA");
             modelBuilder.Entity<AttachmentOrderInfo>()
+         .Property(b => b.by_order_recording_entries_that_were_missed_during_computerization)
+         .HasDefaultValue("NA");
+            modelBuilder.Entity<AttachmentOrderInfo>()
              .Property(b => b.createddatetime)
             .HasDefaultValueSql("current_timestamp");
             modelBuilder.Entity<AttachmentOrderInfo>()

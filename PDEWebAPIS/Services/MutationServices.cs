@@ -17387,7 +17387,7 @@ namespace PDEWebAPIS.Services
                         }
                     }
                 }
-            } 
+            }
             //घोषणापत्र नोंद
             else if (applicationDTL.mutation_type_code == "11")
             {
@@ -17404,6 +17404,12 @@ namespace PDEWebAPIS.Services
             else if (applicationDTL.mutation_type_code == "34")
             {
                 mutationgivertype = "जप्ती कमी आदेश";
+                mutationtakertype = "";
+            }
+            //आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे
+            else if (applicationDTL.mutation_type_code == "44")
+            {
+                mutationgivertype = "आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे";
                 mutationtakertype = "";
             }
             application.fetchHibanamaWitnessInfoDataList = fetchHibanamaWitnessInfoDataList;
@@ -18084,6 +18090,28 @@ namespace PDEWebAPIS.Services
                     }
                 }
             }
+            // आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे.
+            else if (applicationDTL.mutation_type_code == "44")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.attachmentorderids))
+                {
+                    string[] attachmentorderIds = applicationDTL.attachmentorderids.Split(",");
+
+                    if (attachmentorderIds.Length > 0)
+                    {
+                        for (int i = 0; i < attachmentorderIds.Length; i++)
+                        {
+                            FetchAttachmentOrderMissedRecordInfo fetchAttachmentOrderMissedRecord = new FetchAttachmentOrderMissedRecordInfo();
+                            fetchAttachmentOrderMissedRecord = FetchAttachmentOrderMissedRecordData(Convert.ToInt32(attachmentorderIds[i]));
+                            if (fetchAttachmentOrderMissedRecord != null)
+                            {
+                                mutationgiver.Add(fetchAttachmentOrderMissedRecord);
+                            }
+                        }
+                    }
+                }
+            }
             return mutationgiver;
         }
         public List<dynamic> mutationtakerData(ApplicationDTL applicationDTL)
@@ -18301,6 +18329,11 @@ namespace PDEWebAPIS.Services
             }
             // Japti Kami Adesh
             else if (applicationDTL.mutation_type_code == "34")
+            {
+                mutationtaker = null;
+            }
+            // आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे
+            else if (applicationDTL.mutation_type_code == "44")
             {
                 mutationtaker = null;
             }
@@ -27997,6 +28030,80 @@ namespace PDEWebAPIS.Services
                 fetchData.institutionAddress = dbdata.address_of_the_agency_issuing_the_attachment_order;
                 fetchData.orderNo = dbdata.attachment_order_number;
                 fetchData.orderDate = dbdata.date_of_the_attachment_order;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        // आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे.
+        public string SaveAttachmentOrderMissedRecordInfoData(AttachmentOrderMissedRecordInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationid!)!;
+                    //Assign Data to Table fields to insert new records
+                    AttachmentOrderInfo dbTable = new AttachmentOrderInfo();
+                    dbTable.userMaster = userMaster;
+                    dbTable.applicationDTL = applicationDTL;
+                    dbTable.by_order_recording_entries_that_were_missed_during_computerization = inputData.nondichaTapshil;
+                    dbTable.nabhu_no = "NA";
+                    dbTable.mutation_srno = "NA";
+                    dbTable.owner_number = "NA";
+                    dbTable.owner_name = "NA";
+                    dbTable.area = "NA";
+                    dbTable.agencies_issuing_attachment_orders = "NA";
+                    dbTable.name_of_the_agency_issuing_the_attachment_order = "NA";
+                    dbTable.address_of_the_agency_issuing_the_attachment_order = "NA";
+                    dbTable.attachment_order_number = "NA";
+                    dbTable.date_of_the_attachment_order = "NA";
+                    _context.attachmentOrderInfos.Add(dbTable);
+                    _context.SaveChanges();
+
+                    //Get Saved Row ID
+                    int rowid = (int)dbTable.attachmentorderid!;
+
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationid)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.attachmentorderids) && !applicationDTLdata.attachmentorderids.Contains(rowid.ToString()))
+                        {
+                            applicationDTLdata.attachmentorderids = applicationDTLdata.attachmentorderids + "," + rowid.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.attachmentorderids = rowid.ToString();
+                        }
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchAttachmentOrderMissedRecordInfo FetchAttachmentOrderMissedRecordData(int attachmentorderid)
+        {
+            try
+            {
+                AttachmentOrderInfo dbdata = new AttachmentOrderInfo();
+                dbdata = _context.attachmentOrderInfos.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.attachmentorderid.Equals(attachmentorderid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchAttachmentOrderMissedRecordInfo fetchData = new FetchAttachmentOrderMissedRecordInfo();
+                fetchData.attachmentorderid = dbdata.attachmentorderid;
+                fetchData.userid = dbdata.userMaster!.userid;
+                fetchData.applicationid = dbdata.applicationDTL!.applicationid;
+                fetchData.nondichaTapshil = dbdata.by_order_recording_entries_that_were_missed_during_computerization;
                 return fetchData;
             }
             catch (Exception ex)

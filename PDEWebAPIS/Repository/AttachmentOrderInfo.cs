@@ -30,6 +30,7 @@ namespace PDEWebAPIS.Repository
         public string? recovery_cert_for_105_issued_by_the_liquidator {  get; set; }
         public string? orbiter_order_no {  get; set; }
         public string? orbiter_order_date { get; set; }
+        public string? by_order_recording_entries_that_were_missed_during_computerization {  get; set; }
         public DateTime createddatetime { get; set; }
         public bool isDeleted { set; get; }
         public DateOnly deleteddate { set; get; }
