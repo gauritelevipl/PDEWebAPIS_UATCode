@@ -335,7 +335,7 @@ namespace PDEWebAPIS.Data
             modelBuilder.Entity<GrievanceIssueDatesDetails>()
             .Property(b => b.Datetime)
             .HasDefaultValueSql("current_timestamp");
-           
+
 
             modelBuilder.Entity<GrievanceIssueDatesDetails>()
             .Property(b => b.StatusDatetime)
@@ -346,7 +346,7 @@ namespace PDEWebAPIS.Data
             .HasDefaultValue("NA");
 
             modelBuilder.Entity<pinCodeApiResponseTbl>()
-            .Property(b=>b.createdDateTime).
+            .Property(b => b.createdDateTime).
             HasDefaultValueSql("current_timestamp");
 
             modelBuilder.Entity<InwardNoStatusMaster>().HasIndex(u => new { u.srno, u.inwardno }).IsUnique();
@@ -514,6 +514,37 @@ namespace PDEWebAPIS.Data
             modelBuilder.Entity<DeclarationEntryInfo>()
          .Property(b => b.deleteddate)
          .HasDefaultValueSql("1900-01-01");
+
+
+            //Below code added on 07 Oct 26
+            modelBuilder.Entity<AttachmentOrderInfo>()
+              .Property(b => b.is_the_attachment_order_issued_by_a_credit_society_or_a_bank)
+              .HasDefaultValue("NO");
+
+            modelBuilder.Entity<AttachmentOrderInfo>()
+           .Property(b => b.recovery_cert_under_section_101_issued_by_the_cooperative_officer)
+           .HasDefaultValue("NA");
+            modelBuilder.Entity<AttachmentOrderInfo>()
+            .Property(b => b.recovery_cert_issued_by_the_cooperative_officer_in_91)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<AttachmentOrderInfo>()
+           .Property(b => b.recovery_cert_for_105_issued_by_the_liquidator)
+           .HasDefaultValue("NA");
+            modelBuilder.Entity<AttachmentOrderInfo>()
+           .Property(b => b.orbiter_order_no)
+           .HasDefaultValue("NA");
+            modelBuilder.Entity<AttachmentOrderInfo>()
+           .Property(b => b.orbiter_order_date)
+           .HasDefaultValue("NA");
+            modelBuilder.Entity<AttachmentOrderInfo>()
+             .Property(b => b.createddatetime)
+            .HasDefaultValueSql("current_timestamp");
+            modelBuilder.Entity<AttachmentOrderInfo>()
+          .Property(b => b.isDeleted)
+          .HasDefaultValue(false);
+            modelBuilder.Entity<AttachmentOrderInfo>()
+         .Property(b => b.deleteddate)
+         .HasDefaultValueSql("1900-01-01");
         }
 
         public DbSet<PropertyTypeMaster> propertyTypes { get; set; }
@@ -561,6 +592,7 @@ namespace PDEWebAPIS.Data
         public DbSet<NameChangeDTL> nameChangeDTLs { get; set; }
         public DbSet<WitnessDTL> witnessDTLs { get; set; }
         public DbSet<DeclarationEntryInfo> declarationEntryInfos { get; set; }
+        public DbSet<AttachmentOrderInfo> attachmentOrderInfos { get; set; }
 
     }
 }

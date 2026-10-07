@@ -54,5 +54,6 @@ namespace PDEWebAPIS.Repository
         public string? witnessids { get; set; }
         //Below code added on 05 Oct 26
         public string? declarationentryids { get; set; }
+        public string? attachmentorderids { get;set; }
     }
 }

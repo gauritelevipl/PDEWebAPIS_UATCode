@@ -39,6 +39,12 @@
         public int? declarationid { set; get; }
         public string? applicationid { set; get; }
     }
+
+    public class DeleteAttachmentOrderData
+    {
+        public int? attachmentorderid { set; get; }
+        public string? applicationid { set; get; }
+    }
 }
 
      
