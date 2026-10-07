@@ -8399,5 +8399,213 @@ namespace PDEWebAPIS.Controllers
                 }
             }
         }
+
+        // आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे
+        [Authorize]
+        [HttpPost]
+        [Route("SaveAttachmentOrderMissedRecordInfo")]
+        public string SaveAttachmentOrderMissedRecordInfo([FromBody] string val)
+        //AttachmentOrderMissedRecordInfoInputModel inputData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Adeshane - Sanganikaran kartana sutalelya nondi ghene - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                AttachmentOrderMissedRecordInfoInputModel inputData = JsonConvert.DeserializeObject<AttachmentOrderMissedRecordInfoInputModel>(decrypted!)!;
+                _logger.LogInformation("Save Japti Adesh Request Data - " + decrypted);
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveAttachmentOrderMissedRecordInfoData(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationid!, "Save Adeshane - Sanganikaran kartana sutalelya nondi ghene Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे is Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Adeshane - Sanganikaran kartana sutalelya nondi ghene Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Save Adeshane - Sanganikaran kartana sutalelya nondi ghene Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetAttachmentOrderMissedRecordInfo")]
+        public string GetAttachmentOrderMissedRecordInfo([FromBody] string val)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Adeshane - Sanganikaran kartana sutalelya nondi ghene Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Adeshane - Sanganikaran kartana sutalelya nondi ghene Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchAttachmentOrderMissedRecordInfo> dataList = new List<FetchAttachmentOrderMissedRecordInfo>();
+                if (!string.IsNullOrEmpty(applicationDTL.attachmentorderids))
+                {
+                    string[] nondIDs = applicationDTL.attachmentorderids!.Split(",");
+                    if (nondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < nondIDs.Length; i++)
+                        {
+                            FetchAttachmentOrderMissedRecordInfo fetchData = new FetchAttachmentOrderMissedRecordInfo();
+                            fetchData = mutationServices.FetchAttachmentOrderMissedRecordData(Convert.ToInt32(nondIDs[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे Information Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Adeshane - Sanganikaran kartana sutalelya nondi ghene Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteAttachmentOrderMissedRecordInfo")]
+        public string DeleteAttachmentOrderMissedRecordInfo([FromBody] string val)
+        //DeleteAttachmentOrderData delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Japti Kami Adesh - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteAttachmentOrderData delete = JsonConvert.DeserializeObject<DeleteAttachmentOrderData>(decrypted!)!;
+                _logger.LogInformation("Delete Adeshane - Sanganikaran kartana sutalelya nondi ghene Request Data - " + decrypted);
+                string Response = mutationServices.DeleteAttachmentOrderData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Adeshane - Sanganikaran kartana sutalelya nondi ghene Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Adeshane - Sanganikaran kartana sutalelya nondi ghene Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Adeshane - Sanganikaran kartana sutalelya nondi ghene Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
     }
 }
