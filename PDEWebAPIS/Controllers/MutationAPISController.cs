@@ -7982,5 +7982,422 @@ namespace PDEWebAPIS.Controllers
                 }
             }
         }
+
+        // Below code added on 07 Oct 26
+        //Japti Adesh
+        [Authorize]
+        [HttpPost]
+        [Route("SaveAttachmentOrderInfo")]
+        public string SaveAttachmentOrderInfo([FromBody] string val)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Japti Adesh - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                AttachmentOrderInfoInputModel inputData = JsonConvert.DeserializeObject<AttachmentOrderInfoInputModel>(decrypted!)!;
+                _logger.LogInformation("Save Japti Adesh Request Data - " + decrypted);
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveAttachmentOrderInfoData(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationid!, "Save Japti Adesh Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Japti Adesh is Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Japti Adesh Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Save Japti Adesh Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetAttachmentOrderInfo")]
+        public string GetAttachmentOrderInfo([FromBody] string val)
+        //string ApplicationID)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Japti Adesh Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Japti Adesh Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchAttachmentOrderInfo> dataList = new List<FetchAttachmentOrderInfo>();
+                if (!string.IsNullOrEmpty(applicationDTL.attachmentorderids))
+                {
+                    string[] nondIDs = applicationDTL.attachmentorderids!.Split(",");
+                    if (nondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < nondIDs.Length; i++)
+                        {
+                            FetchAttachmentOrderInfo fetchData = new FetchAttachmentOrderInfo();
+                            fetchData = mutationServices.FetchAttachmentOrderData(Convert.ToInt32(nondIDs[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Japti Adesh Information Data Found", dataList)));
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Japti Adesh Information Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Japti Adesh Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteAttachmentOrderInfo")]
+        public string DeleteAttachmentOrderInfo([FromBody] string val)
+        //DeleteAttachmentOrderData delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Japti Adesh - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteAttachmentOrderData delete = JsonConvert.DeserializeObject<DeleteAttachmentOrderData>(decrypted!)!;
+                _logger.LogInformation("Delete Japti Adesh Request Data - " + decrypted);
+                string Response = mutationServices.DeleteAttachmentOrderData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Japti Adesh Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Japti Adesh Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Japti Adesh Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Japti Adesh Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        // Japti kami Adesh
+        [Authorize]
+        [HttpPost]
+        [Route("SaveOrderToReduceAttachmentInfo")]
+        public string SaveOrderToReduceAttachmentInfo([FromBody] string val)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Japti Kami Adesh - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                OrderToReduceAttachmentInfoInputModel inputData = JsonConvert.DeserializeObject<OrderToReduceAttachmentInfoInputModel>(decrypted!)!;
+                _logger.LogInformation("Save Japti Adesh Request Data - " + decrypted);
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveOrderToReduceAttachmentInfoData(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationid!, "Save Japti Kami Adesh Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Japti Kami Adesh is Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Japti Kami Adesh Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Save Japti Kami Adesh Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetOrderToReduceAttachmentInfo")]
+        public string GetOrderToReduceAttachmentInfo([FromBody] string val)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Japti Kami Adesh Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Japti Kami Adesh Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchOrderToReduceAttachmentInfo> dataList = new List<FetchOrderToReduceAttachmentInfo>();
+                if (!string.IsNullOrEmpty(applicationDTL.attachmentorderids))
+                {
+                    string[] nondIDs = applicationDTL.attachmentorderids!.Split(",");
+                    if (nondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < nondIDs.Length; i++)
+                        {
+                            FetchOrderToReduceAttachmentInfo fetchData = new FetchOrderToReduceAttachmentInfo();
+                            fetchData = mutationServices.FetchOrderToReduceAttachmentData(Convert.ToInt32(nondIDs[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Japti Kami Adesh Information Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Japti Kami Adesh Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteOrderToReduceAttachmentInfo")]
+        public string DeleteOrderToReduceAttachmentInfo([FromBody] string val)
+        //DeleteAttachmentOrderData delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Japti Kami Adesh - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteAttachmentOrderData delete = JsonConvert.DeserializeObject<DeleteAttachmentOrderData>(decrypted!)!;
+                _logger.LogInformation("Delete Japti Kami Adesh Request Data - " + decrypted);
+                string Response = mutationServices.DeleteAttachmentOrderData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Japti Kami Adesh Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Japti Kami Adesh Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Japti Kami Adesh Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Japti Kami Adesh Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
     }
 }

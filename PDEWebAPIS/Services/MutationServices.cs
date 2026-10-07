@@ -17387,10 +17387,23 @@ namespace PDEWebAPIS.Services
                         }
                     }
                 }
-            } //घोषणापत्र नोंद
+            } 
+            //घोषणापत्र नोंद
             else if (applicationDTL.mutation_type_code == "11")
             {
                 mutationgivertype = "घोषणापत्र नोंद";
+                mutationtakertype = "";
+            }
+            //जप्ती आदेश
+            else if (applicationDTL.mutation_type_code == "26")
+            {
+                mutationgivertype = "जप्ती आदेश";
+                mutationtakertype = "";
+            }
+            //जप्ती कमी आदेश
+            else if (applicationDTL.mutation_type_code == "34")
+            {
+                mutationgivertype = "जप्ती कमी आदेश";
                 mutationtakertype = "";
             }
             application.fetchHibanamaWitnessInfoDataList = fetchHibanamaWitnessInfoDataList;
@@ -18026,6 +18039,51 @@ namespace PDEWebAPIS.Services
                     }
                 }
             }
+
+            // Japti adesh
+            else if (applicationDTL.mutation_type_code == "26")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.attachmentorderids))
+                {
+                    string[] attachmentorderIds = applicationDTL.attachmentorderids.Split(",");
+
+                    if (attachmentorderIds.Length > 0)
+                    {
+                        for (int i = 0; i < attachmentorderIds.Length; i++)
+                        {
+                            FetchAttachmentOrderInfo fetchAttachmentOrderInfo = new FetchAttachmentOrderInfo();
+                            fetchAttachmentOrderInfo = FetchAttachmentOrderData(Convert.ToInt32(attachmentorderIds[i]));
+                            if (fetchAttachmentOrderInfo != null)
+                            {
+                                mutationgiver.Add(fetchAttachmentOrderInfo);
+                            }
+                        }
+                    }
+                }
+            }
+            // Japti Kami Adesh
+            else if (applicationDTL.mutation_type_code == "34")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.attachmentorderids))
+                {
+                    string[] attachmentorderIds = applicationDTL.attachmentorderids.Split(",");
+
+                    if (attachmentorderIds.Length > 0)
+                    {
+                        for (int i = 0; i < attachmentorderIds.Length; i++)
+                        {
+                            FetchOrderToReduceAttachmentInfo fetchOrderToReduceAttachmentInfo = new FetchOrderToReduceAttachmentInfo();
+                            fetchOrderToReduceAttachmentInfo = FetchOrderToReduceAttachmentData(Convert.ToInt32(attachmentorderIds[i]));
+                            if (fetchOrderToReduceAttachmentInfo != null)
+                            {
+                                mutationgiver.Add(fetchOrderToReduceAttachmentInfo);
+                            }
+                        }
+                    }
+                }
+            }
             return mutationgiver;
         }
         public List<dynamic> mutationtakerData(ApplicationDTL applicationDTL)
@@ -18233,6 +18291,16 @@ namespace PDEWebAPIS.Services
             }
             // Ghoshanapatra Nond
             else if (applicationDTL.mutation_type_code == "11")
+            {
+                mutationtaker = null;
+            }
+            // Japti adesh
+            else if (applicationDTL.mutation_type_code == "26")
+            {
+                mutationtaker = null;
+            }
+            // Japti Kami Adesh
+            else if (applicationDTL.mutation_type_code == "34")
             {
                 mutationtaker = null;
             }
@@ -27699,6 +27767,241 @@ namespace PDEWebAPIS.Services
                 {
                     throw new HandleException(ex.Message.ToString());
                 }
+            }
+        }
+
+        // Below code added on 07 Oct 26
+        public string SaveAttachmentOrderInfoData(AttachmentOrderInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationid!)!;
+                    if (inputData.selectedOwners!.Count > 0)
+                    {
+                        for (int i = 0; i < inputData.selectedOwners!.Count; i++)
+                        {
+                            //Assign Data to Table fields to insert new records
+                            AttachmentOrderInfo dbTable = new AttachmentOrderInfo();
+                            dbTable.userMaster = userMaster;
+                            dbTable.applicationDTL = applicationDTL;
+                            dbTable.nabhu_no = inputData.nabhu;
+                            dbTable.mutation_srno = inputData.selectedOwners[i].mutation_srno;
+                            dbTable.owner_number = inputData.selectedOwners[i].owner_number;
+                            dbTable.owner_name = inputData.selectedOwners[i].owner_name;
+                            dbTable.area = inputData.selectedOwners[i].area;
+                            dbTable.agencies_issuing_attachment_orders = inputData.institution;
+                            dbTable.name_of_the_agency_issuing_the_attachment_order = inputData.institutionName;
+                            dbTable.address_of_the_agency_issuing_the_attachment_order = inputData.institutionAddress;
+                            dbTable.attachment_order_number = inputData.orderNo;
+                            dbTable.date_of_the_attachment_order = inputData.orderDate;
+                            dbTable.is_the_attachment_order_issued_by_a_credit_society_or_a_bank = inputData.isRecoveryApplicable.ToUpper();
+                            dbTable.recovery_cert_under_section_101_issued_by_the_cooperative_officer = inputData.recovery101;
+                            dbTable.recovery_cert_issued_by_the_cooperative_officer_in_91 = inputData.recovery91;
+                            dbTable.recovery_cert_for_105_issued_by_the_liquidator = inputData.recovery105;
+                            dbTable.orbiter_order_no = inputData.arbitratorOrder;
+                            dbTable.orbiter_order_date = inputData.arbitratorOrderDate;
+                            _context.attachmentOrderInfos.Add(dbTable);
+                            _context.SaveChanges();
+
+                            //Get Saved Row ID
+                            int rowid = (int)dbTable.attachmentorderid!;
+
+                            var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationid)).FirstOrDefault();
+                            if (applicationDTLdata != null)
+                            {
+                                if (!string.IsNullOrEmpty(applicationDTLdata.attachmentorderids) && !applicationDTLdata.attachmentorderids.Contains(rowid.ToString()))
+                                {
+                                    applicationDTLdata.attachmentorderids = applicationDTLdata.attachmentorderids + "," + rowid.ToString();
+                                }
+                                else
+                                {
+                                    applicationDTLdata.attachmentorderids = rowid.ToString();
+                                }
+                                _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                                _context.SaveChanges();
+                            }
+                        }
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchAttachmentOrderInfo FetchAttachmentOrderData(int attachmentorderid)
+        {
+            try
+            {
+                AttachmentOrderInfo dbdata = new AttachmentOrderInfo();
+                dbdata = _context.attachmentOrderInfos.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.attachmentorderid.Equals(attachmentorderid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchAttachmentOrderInfo fetchData = new FetchAttachmentOrderInfo();
+                fetchData.attachmentorderid = dbdata.attachmentorderid;
+                fetchData.userid = dbdata.userMaster!.userid;
+                fetchData.applicationid = dbdata.applicationDTL!.applicationid;
+                fetchData.nabhu = dbdata.nabhu_no;
+                OwnerDTLForAttachmentOrderInfo selectedOwners = new OwnerDTLForAttachmentOrderInfo();
+
+                selectedOwners.mutation_srno = dbdata.mutation_srno;
+                selectedOwners.owner_number = dbdata.owner_number;
+                selectedOwners.owner_name = dbdata.owner_name;
+                selectedOwners.area = dbdata.area;
+                fetchData.selectedOwners = selectedOwners;
+
+                fetchData.institution = dbdata.agencies_issuing_attachment_orders;
+                fetchData.institutionName = dbdata.name_of_the_agency_issuing_the_attachment_order;
+                fetchData.institutionAddress = dbdata.address_of_the_agency_issuing_the_attachment_order;
+                fetchData.orderNo = dbdata.attachment_order_number;
+                fetchData.orderDate = dbdata.date_of_the_attachment_order;
+                fetchData.isRecoveryApplicable = dbdata.is_the_attachment_order_issued_by_a_credit_society_or_a_bank;
+                fetchData.recovery101 = dbdata.recovery_cert_under_section_101_issued_by_the_cooperative_officer;
+                fetchData.recovery91 = dbdata.recovery_cert_issued_by_the_cooperative_officer_in_91;
+                fetchData.recovery105 = dbdata.recovery_cert_for_105_issued_by_the_liquidator;
+                fetchData.arbitratorOrder = dbdata.orbiter_order_no;
+                fetchData.arbitratorOrderDate = dbdata.orbiter_order_date;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteAttachmentOrderData(DeleteAttachmentOrderData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    MethodForFileUpload methodForFileUpload = new MethodForFileUpload();
+                    var entity = _context.attachmentOrderInfos.FirstOrDefault(s => s.attachmentorderid == deleteMutation.attachmentorderid! && s.isDeleted == false)!;
+                    if (entity != null)
+                    {
+                        entity.isDeleted = true;
+                        entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                        _context.attachmentOrderInfos.Attach(entity);
+                        _context.SaveChanges();
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string attachmentorderids = applicationDTLdata.attachmentorderids!;
+                            string[] mutationids = attachmentorderids.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.attachmentorderid.ToString());
+
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.attachmentorderids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                            var checkUpdatedIds = mutationids.Where(id => id != deleteMutation.attachmentorderid.ToString()).ToArray();
+                        }
+                        scope.Complete();
+                        return "Success";
+                    }
+                    else { return "False"; }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public string SaveOrderToReduceAttachmentInfoData(OrderToReduceAttachmentInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationid!)!;
+                    if (inputData.selectedOwners!.Count > 0)
+                    {
+                        for (int i = 0; i < inputData.selectedOwners!.Count; i++)
+                        {
+                            //Assign Data to Table fields to insert new records
+                            AttachmentOrderInfo dbTable = new AttachmentOrderInfo();
+                            dbTable.userMaster = userMaster;
+                            dbTable.applicationDTL = applicationDTL;
+                            dbTable.nabhu_no = inputData.nabhu;
+                            dbTable.mutation_srno = inputData.selectedOwners[i].mutation_srno;
+                            dbTable.owner_number = inputData.selectedOwners[i].owner_number;
+                            dbTable.owner_name = inputData.selectedOwners[i].owner_name;
+                            dbTable.area = inputData.selectedOwners[i].area;
+                            dbTable.agencies_issuing_attachment_orders = inputData.institution;
+                            dbTable.name_of_the_agency_issuing_the_attachment_order = inputData.institutionName;
+                            dbTable.address_of_the_agency_issuing_the_attachment_order = inputData.institutionAddress;
+                            dbTable.attachment_order_number = inputData.orderNo;
+                            dbTable.date_of_the_attachment_order = inputData.orderDate;
+                            _context.attachmentOrderInfos.Add(dbTable);
+                            _context.SaveChanges();
+
+                            //Get Saved Row ID
+                            int rowid = (int)dbTable.attachmentorderid!;
+
+                            var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationid)).FirstOrDefault();
+                            if (applicationDTLdata != null)
+                            {
+                                if (!string.IsNullOrEmpty(applicationDTLdata.attachmentorderids) && !applicationDTLdata.attachmentorderids.Contains(rowid.ToString()))
+                                {
+                                    applicationDTLdata.attachmentorderids = applicationDTLdata.attachmentorderids + "," + rowid.ToString();
+                                }
+                                else
+                                {
+                                    applicationDTLdata.attachmentorderids = rowid.ToString();
+                                }
+                                _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                                _context.SaveChanges();
+                            }
+                        }
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchOrderToReduceAttachmentInfo FetchOrderToReduceAttachmentData(int attachmentorderid)
+        {
+            try
+            {
+                AttachmentOrderInfo dbdata = new AttachmentOrderInfo();
+                dbdata = _context.attachmentOrderInfos.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.attachmentorderid.Equals(attachmentorderid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchOrderToReduceAttachmentInfo fetchData = new FetchOrderToReduceAttachmentInfo();
+                fetchData.attachmentorderid = dbdata.attachmentorderid;
+                fetchData.userid = dbdata.userMaster!.userid;
+                fetchData.applicationid = dbdata.applicationDTL!.applicationid;
+                fetchData.nabhu = dbdata.nabhu_no;
+                OwnerDTLForOrderToReduceAttachment selectedOwners = new OwnerDTLForOrderToReduceAttachment();
+
+                selectedOwners.mutation_srno = dbdata.mutation_srno;
+                selectedOwners.owner_number = dbdata.owner_number;
+                selectedOwners.owner_name = dbdata.owner_name;
+                selectedOwners.area = dbdata.area;
+                fetchData.selectedOwners = selectedOwners;
+
+                fetchData.institution = dbdata.agencies_issuing_attachment_orders;
+                fetchData.institutionName = dbdata.name_of_the_agency_issuing_the_attachment_order;
+                fetchData.institutionAddress = dbdata.address_of_the_agency_issuing_the_attachment_order;
+                fetchData.orderNo = dbdata.attachment_order_number;
+                fetchData.orderDate = dbdata.date_of_the_attachment_order;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
             }
         }
     }
