@@ -185,7 +185,7 @@ namespace PDEWebAPIS.Services
                                         //_logger.LogInformation("body check in get villege by office: " + body);
                                         return decrypted + "$VIPL" + (int)response.StatusCode;
                                     }
-                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                     {
                                         return decrypted + "$" + (int)response.StatusCode;
                                     }
@@ -202,7 +202,7 @@ namespace PDEWebAPIS.Services
                                     {
                                         return "Data Not Found" + "$VIPL" + "400";
                                     }
-                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                     {
                                         return "Data Not Found" + "$" + "400";
                                     }
@@ -220,7 +220,7 @@ namespace PDEWebAPIS.Services
                                 {
                                     return jsonObject!.message! + "$VIPL" + jsonObject!.Status;
                                 }
-                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                 {
                                     return jsonObject!.message! + "$" + jsonObject!.Status;
                                 }
@@ -242,7 +242,7 @@ namespace PDEWebAPIS.Services
                                 {
                                     return "Data Not Found" + "$VIPL" + "400";
                                 }
-                                if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                 {
                                     return "Data Not Found" + "$" + "400";
                                 }
@@ -258,7 +258,7 @@ namespace PDEWebAPIS.Services
                                     return "Invalid Response" + "$VIPL" + "400";
 
                                 }
-                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                                 {
                                     return "Invalid Response" + "$" + "400";
 
@@ -282,7 +282,7 @@ namespace PDEWebAPIS.Services
                         {
                             return "Data Not Found" + "$VIPL" + "400";
                         }
-                        else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+                        else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
                         {
                             return "Data Not Found" + "$" + "400";
                         }
@@ -315,7 +315,7 @@ namespace PDEWebAPIS.Services
             {
                 return "Data Not Found" + "$VIPL" + "400";
             }
-            else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion")
+            else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
             {
                 return "Data Not Found" + "$" + "400";
             }
@@ -600,17 +600,27 @@ namespace PDEWebAPIS.Services
 
         public async Task<string> getOwnerNameInfo(RequestOwnerNameInfo body, ILogger _logger)
         {
-            /*var body = new Dictionary<string, string>();
-            body.Add("mut_type", mut_type);*/
             string response = await SendRequestAsync("getOwnerNameInfo", HttpMethod.Post, _logger, body);
-            if (response.Split("|")[1] == "200")
+            /* if (response.Split("|")[1] == "200")
+             {
+                 var districts = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("|")[0]);
+                 return JsonConvert.SerializeObject(districts) + "|" + response.Split("|")[1];
+             }*/
+            if (response.Split("$")[1] == "200")
             {
-                var districts = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("|")[0]);
-                return JsonConvert.SerializeObject(districts) + "|" + response.Split("|")[1];
+                if (response.Split("$")[0] != null && response.Split("$")[0].ToList().Count > 0)
+                {
+
+                    var regions = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("$")[0]);
+                    _logger.LogInformation("Owner Data: " + regions);
+                    return JsonConvert.SerializeObject(regions) + "$" + response.Split("$")[1];
+                }
+                else
+                {
+                    return "Owner Name List is Empty" + "$" + response.Split("$")[1];
+                }
             }
             else return response;
-            //return response;
-
         }
 
         public async Task<string> getOwnerDetails(RequestOwnerDetails body, ILogger _logger)
