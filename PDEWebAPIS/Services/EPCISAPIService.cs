@@ -601,6 +601,11 @@ namespace PDEWebAPIS.Services
         public async Task<string> getOwnerNameInfo(RequestOwnerNameInfo body, ILogger _logger)
         {
             string response = await SendRequestAsync("getOwnerNameInfo", HttpMethod.Post, _logger, body);
+            /* if (response.Split("|")[1] == "200")
+             {
+                 var districts = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("|")[0]);
+                 return JsonConvert.SerializeObject(districts) + "|" + response.Split("|")[1];
+             }*/
             if (response.Split("$")[1] == "200")
             {
                 if (response.Split("$")[0] != null && response.Split("$")[0].ToList().Count > 0)
@@ -615,14 +620,7 @@ namespace PDEWebAPIS.Services
                     return "Owner Name List is Empty" + "$" + response.Split("$")[1];
                 }
             }
-            //if (response.Split("|")[1] == "200")
-            //{
-            //    var districts = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("|")[0]);
-            //    return JsonConvert.SerializeObject(districts) + "|" + response.Split("|")[1];
-            //}
             else return response;
-            //return response;
-
         }
 
         public async Task<string> getOwnerDetails(RequestOwnerDetails body, ILogger _logger)
