@@ -44,6 +44,1123 @@ namespace PDEWebAPIS.Services
             _logger = logger;
         }
 
+        public ApplicationDataForNIC GetApplicationDataForNIC(int userid, string applicationid)
+        {
+            ApplicationDataForNIC application = new ApplicationDataForNIC();
+            // Fetch Registered User Data
+            List<FetchUserDataForNIC> userDataList = new List<FetchUserDataForNIC>();
+
+            FetchUserDataForNIC userData = new FetchUserDataForNIC();
+            userData = FetchUserData(userid);
+            userDataList.Add(userData);
+            application.usermaster = userDataList;
+            //Fetch All Application Details
+            List<FetchApplicationDTLsForNIC> applicationDTLList = new List<FetchApplicationDTLsForNIC>();
+            ApplicationDTL applicationDTL = FetchApplicationData(applicationid);
+
+            if (applicationDTL == null)
+            {
+                throw new HandleException("Application Not Found");
+            }
+            //Get Application Details
+            FetchApplicationDTLsForNIC fetchApplicationDTLsForNIC = new FetchApplicationDTLsForNIC();
+            fetchApplicationDTLsForNIC = GetApplicationDtls(applicationDTL);
+            applicationDTLList.Add(fetchApplicationDTLsForNIC);
+
+            application.applicationdtl = applicationDTLList;
+
+            //Get All Applicant Details
+            List<FetchApplicantsDataForNIC> applicantsList = new List<FetchApplicantsDataForNIC>();
+            if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.applicantIDs))
+            {
+                string[] applicantIDS = applicationDTL.applicantIDs.Split(",");
+
+                if (applicantIDS.Length > 0)
+                {
+                    for (int i = 0; i < applicantIDS.Length; i++)
+                    {
+                        FetchApplicantsDataForNIC applicant = new FetchApplicantsDataForNIC();
+                        applicant = FetchApplicantData(Convert.ToInt32(applicantIDS[i]));
+                        if (applicant != null)
+                        {
+                            applicantsList.Add(applicant);
+                        }
+                    }
+                }
+            }
+            application.applicantmaster = applicantsList;
+
+            //Get All Mutation CTS Data
+            List<FetchMutationCTSNoDataForNIC> mutationCTSNoList = new List<FetchMutationCTSNoDataForNIC>();
+            if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.mutation_cts_nos))
+            {
+                string[] mutationCTSNoIDs = applicationDTL.mutation_cts_nos.Split(",");
+
+                if (mutationCTSNoIDs.Length > 0)
+                {
+                    for (int i = 0; i < mutationCTSNoIDs.Length; i++)
+                    {
+                        FetchMutationCTSNoDataForNIC mutationCTSNoData = new FetchMutationCTSNoDataForNIC();
+                        mutationCTSNoData = FetchMutationCTSData(Convert.ToInt32(mutationCTSNoIDs[i]));
+                        if (mutationCTSNoData != null)
+                        {
+                            mutationCTSNoList.Add(mutationCTSNoData);
+                        }
+                    }
+
+                }
+            }
+            else
+            {
+                FetchMutationCTSNoDataForNIC fetchData = new FetchMutationCTSNoDataForNIC();
+                fetchData.mutation_cts_no_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.what_is_mentioned_in_the_doc = "";
+                fetchData.village_or_peth_code = "";
+                fetchData.village_or_peth_name = "";
+                fetchData.village_english_name = "";
+                fetchData.village_lgd_code = "";
+                fetchData.zone_code = "";
+                fetchData.amount = "";
+                fetchData.mutation_modification_type = "";
+                fetchData.city_servey_no_mentioned_in_application = "";
+                fetchData.servey_no = "";
+                fetchData.selected_city_servey_no = "";
+                fetchData.lr_property_uid = "";
+                fetchData.application_income_type = "";
+                fetchData.city_servey_area_in_sq_m = "";
+                fetchData.building_name = "";
+                fetchData.floor_type = 0;
+                fetchData.floor_desc = "";
+                fetchData.floor_order_by = 0;
+                fetchData.floor_no = "";
+                fetchData.unit_code_156 = 0;
+                fetchData.unit_name_156 = "";
+                fetchData.unit_no = "";
+                fetchData.buildup_area_in_sq_m = "";
+                fetchData.carpet_area_in_sq_m = "";
+                fetchData.terrace_area_in_sq_m = "";
+                fetchData.parking_no = "";
+                fetchData.parking_area_in_sq_m = "";
+                fetchData.shares_in_percent = "";
+                fetchData.nic_flat_details = "";
+                fetchData.flat_bulit_up_area = "";
+                fetchData.sub_property_id = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                mutationCTSNoList.Add(fetchData);
+            }
+            application.mutation_cts_no_dtl = mutationCTSNoList;
+
+            //Get All Dast information
+            List<FetchDastInformationDataForNIC> fetchDastInformationList = new List<FetchDastInformationDataForNIC>();
+            if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.dastIDs))
+            {
+                string[] dastIDs = applicationDTL.dastIDs.Split(",");
+                if (dastIDs.Length > 0)
+                {
+                    for (int i = 0; i < dastIDs.Length; i++)
+                    {
+                        FetchDastInformationDataForNIC fetchDastInformationData = new FetchDastInformationDataForNIC();
+                        fetchDastInformationData = FetchDastInformationData(Convert.ToInt32(dastIDs[i]));
+                        if (fetchDastInformationData != null)
+                        {
+                            fetchDastInformationList.Add(fetchDastInformationData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchDastInformationDataForNIC fetchData = new FetchDastInformationDataForNIC();
+                fetchData.dast_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.dasttype = "";
+                fetchData.division_code = "";
+                fetchData.division_name = "";
+                fetchData.districtcode = "";
+                fetchData.districtname = "";
+                fetchData.office_of_the_second_registrar_code = "";
+                fetchData.office_of_the_second_registrar_name = "";
+                fetchData.registered_dast_no = "";
+                fetchData.registered_dast_date = "";
+                fetchData.registered_dast_year = "";
+                fetchData.dastnabhu = "";
+                fetchData.remarks = "";
+                fetchData.isdastverified = false;
+                fetchData.verifieddastdata = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchDastInformationList.Add(fetchData);
+            }
+            application.dast_information = fetchDastInformationList;
+
+            //Get All courtClaim
+            List<FetchCourtClaimInformationDataForNIC> fetchCourtClaimInformationList = new List<FetchCourtClaimInformationDataForNIC>();
+            if (applicationDTL!.Is_the_claim_pending_before_the_court == true)
+            {
+                if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.courtClaimIDs))
+                {
+                    string[] courtClaimIDS = applicationDTL.courtClaimIDs.Split(",");
+                    if (courtClaimIDS.Length > 0)
+                    {
+                        for (int i = 0; i < courtClaimIDS.Length; i++)
+                        {
+                            FetchCourtClaimInformationDataForNIC fetchCourtClaimInformationData = new FetchCourtClaimInformationDataForNIC();
+                            fetchCourtClaimInformationData = FetchCourtClaimInformation(Convert.ToInt32(courtClaimIDS[i]));
+                            if (fetchCourtClaimInformationData != null)
+                            {
+                                fetchCourtClaimInformationList.Add(fetchCourtClaimInformationData);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchCourtClaimInformationDataForNIC fetchCourtClaimInformationData = new FetchCourtClaimInformationDataForNIC();
+                fetchCourtClaimInformationData.court_claim_id = 0;
+                fetchCourtClaimInformationData.usermasteruserid = 0;
+                fetchCourtClaimInformationData.applicationdtlapplicationid = "";
+                fetchCourtClaimInformationData.court_case_code = "";
+                fetchCourtClaimInformationData.court_case_name = "";
+                fetchCourtClaimInformationData.court_case_type_code = "";
+                fetchCourtClaimInformationData.court_case_type_name = "";
+                fetchCourtClaimInformationData.lr_property_uid = "";
+                fetchCourtClaimInformationData.city_servey_no = "";
+                fetchCourtClaimInformationData.order_details = "";
+                fetchCourtClaimInformationData.stay_order = "";
+                fetchCourtClaimInformationData.sub_property_no = "";
+                fetchCourtClaimInformationData.createddatetime = "";
+                fetchCourtClaimInformationData.isdeleted = false;
+                fetchCourtClaimInformationData.deleteddate = "";
+                fetchCourtClaimInformationList.Add(fetchCourtClaimInformationData);
+            }
+            application.court_claim_information = fetchCourtClaimInformationList;
+
+            //Get Power of Attorney Giver & Taker
+            List<FetchPOADataForNIC> fetchPOADTL = new List<FetchPOADataForNIC>();
+            //List<FetchPOAForGiverDataForNIC> fetchPowerOfAttorneyGiverInformationList = new List<FetchPOAForGiverDataForNIC>();
+            //List<FetchPOAForTakerDataForNIC> fetchPowerOfAttorneyInformationList = new List<FetchPOAForTakerDataForNIC>();
+            if (applicationDTL!.do_you_have_power_of_attorney == true)
+            {
+                if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.powerOfAttorneyIDs))
+                {
+                    string[] poaids = applicationDTL.powerOfAttorneyIDs.Split(",");
+                    if (poaids.Length > 0)
+                    {
+                        for (int i = 0; i < poaids.Length; i++)
+                        {
+                            FetchPOADataForNIC fetcPOAData = new FetchPOADataForNIC();
+                            fetcPOAData = FetchPOADTLForNIC(Convert.ToInt32(poaids[i]));
+                            if (fetcPOAData != null)
+                            {
+                                fetchPOADTL.Add(fetcPOAData);
+                            }
+                        }
+                    }
+                }
+
+                ////Giver
+                //if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.powerOfAttorneyIDs))
+                //{
+                //    string[] powerOfAttorneyIDS = applicationDTL.powerOfAttorneyIDs.Split(",");
+
+                //    if (powerOfAttorneyIDS.Length > 0)
+                //    {
+                //        for (int i = 0; i < powerOfAttorneyIDS.Length; i++)
+                //        {
+                //            FetchPOAForGiverDataForNIC fetchPowerOfAttorneyInformationData = new FetchPOAForGiverDataForNIC();
+                //            fetchPowerOfAttorneyInformationData = FetchPowerOfAttorneyInfoForGiver(Convert.ToInt32(powerOfAttorneyIDS[i]));
+                //            if (fetchPowerOfAttorneyInformationData != null)
+                //            {
+                //                fetchPowerOfAttorneyGiverInformationList.Add(fetchPowerOfAttorneyInformationData);
+                //            }
+                //        }
+                //    }
+                //}
+                //Taker
+                //if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.powerOfAttorneyIDs))
+                //{
+                //    string[] powerOfAttorneyIDS = applicationDTL.powerOfAttorneyIDs.Split(",");
+
+                //    if (powerOfAttorneyIDS.Length > 0)
+                //    {
+                //        FetchGiverData fetchGiverData = new FetchGiverData();
+                //        fetchGiverData = applicationServices.FetchPOAGiverData(applicationid);
+                //        for (int i = 0; i < powerOfAttorneyIDS.Length; i++)
+                //        {
+                //            FetchPOAForTakerDataForNIC fetchPowerOfAttorneyInformationData = new FetchPOAForTakerDataForNIC();
+                //            fetchPowerOfAttorneyInformationData = FetchPowerOfAttorneyInfoForTaker(Convert.ToInt32(powerOfAttorneyIDS[i]));
+                //            if (fetchPowerOfAttorneyInformationData != null)
+                //            {
+                //                //if (fetchGiverData != null)
+                //                //{
+                //                //    for (int j = 0; j < fetchGiverData.giver_names_in_marathi!.Count; j++)
+                //                //    {
+                //                //        if (j == 0)
+                //                //        {
+                //                //            fetchPowerOfAttorneyInformationData.giver_name_in_marathi = fetchGiverData.giver_names_in_marathi[j];
+                //                //            fetchPowerOfAttorneyInformationData.giver_name_in_english = fetchGiverData.giver_names_in_english![j];
+                //                //        }
+                //                //        else
+                //                //        {
+                //                //            fetchPowerOfAttorneyInformationData.giver_name_in_marathi = fetchPowerOfAttorneyInformationData.giver_name_in_marathi + ", " + fetchGiverData.giver_names_in_marathi[j];
+                //                //            fetchPowerOfAttorneyInformationData.giver_name_in_english = fetchPowerOfAttorneyInformationData.giver_name_in_english + ", " + fetchGiverData.giver_names_in_english![j];
+                //                //        }
+                //                //    }
+                //                //}
+                //                fetchPowerOfAttorneyInformationList.Add(fetchPowerOfAttorneyInformationData);
+                //            }
+                //        }
+                //    }
+                //}
+            }
+            else
+            {
+                FetchPOADataForNIC fetcPOAData = new FetchPOADataForNIC();
+                fetcPOAData.power_of_attorney_id = 0;
+                fetcPOAData.usermasteruserid = 0;
+                fetcPOAData.applicationdtlapplicationid = "";
+                fetcPOAData.power_of_attorney_code = 0;
+                fetcPOAData.is_taker = false;
+                fetcPOAData.usertype_code = 0;
+                fetcPOAData.usertype = "";
+                fetcPOAData.mutation_id = 0;
+                fetcPOAData.mobileno = "";
+                fetcPOAData.mobilenoverified = "";
+                fetcPOAData.emailid = "";
+                fetcPOAData.emailidverified = "";
+                fetcPOAData.prefixcode_marathi = "";
+                fetcPOAData.prefix_in_marathi = "";
+                fetcPOAData.fname_in_marathi = "";
+                fetcPOAData.mname_in_marathi = "";
+                fetcPOAData.lname_in_marathi = "";
+                fetcPOAData.prefixcode_eng = "";
+                fetcPOAData.prefix_in_eng = "";
+                fetcPOAData.fname_in_eng = "";
+                fetcPOAData.mname_in_eng = "";
+                fetcPOAData.lname_in_eng = "";
+                fetcPOAData.company_name_in_marathi = "";
+                fetcPOAData.company_name_in_eng = "";
+                fetcPOAData.username = "";
+                fetcPOAData.alias_name = "";
+                fetcPOAData.gender_code = "";
+                fetcPOAData.gender_description = "";
+                fetcPOAData.dob = "";
+                fetcPOAData.mother_name_in_marathi = "";
+                fetcPOAData.mother_name_in_eng = "";
+                fetcPOAData.address_type = "";
+                fetcPOAData.address = "";
+                fetcPOAData.state = "";
+                fetcPOAData.district = "";
+                fetcPOAData.taluka = "";
+                fetcPOAData.city = "";
+                fetcPOAData.flatno_plotno = "";
+                fetcPOAData.societyname = "";
+                fetcPOAData.mainstreet = "";
+                fetcPOAData.landmark = "";
+                fetcPOAData.locality = "";
+                fetcPOAData.pincode = "";
+                fetcPOAData.postofficename = "";
+                fetcPOAData.address_proof_document_name = "";
+                fetcPOAData.address_proof_document_path = "";
+                fetcPOAData.city_servey_no = "";
+                fetcPOAData.lr_property_id = "";
+                fetcPOAData.sub_property_no = "";
+                fetcPOAData.owner_of_property_in_maharashtra = false;
+                fetcPOAData.mutation_srno = "";
+                fetcPOAData.owner_number = "";
+                fetcPOAData.cts_number = "";
+                fetcPOAData.village_code = "";
+                fetcPOAData.village_name = "";
+                fetcPOAData.propertytypeid = 0;
+                fetcPOAData.property_district_code = "";
+                fetcPOAData.property_district_name_in_marathi = "";
+                fetcPOAData.property_district_name_in_english = "";
+                fetcPOAData.property_taluka_code = "";
+                fetcPOAData.property_taluka_name = "";
+                fetcPOAData.property_city_code = "";
+                fetcPOAData.property_city_name = "";
+                fetcPOAData.khateno = "";
+                fetcPOAData.ulpin = "";
+                fetcPOAData.khata_type_code = "";
+                fetcPOAData.khata_type_name = "";
+                fetcPOAData.owner_status_code = "";
+                fetcPOAData.owner_status_description = "";
+                fetcPOAData.attornytype_code = 0;
+                fetcPOAData.attornytype_desc = "";
+                fetcPOAData.landbuyarea = "";
+                fetcPOAData.ispoaispartofdast = "";
+                fetcPOAData.isdeclerationinvolvedinpoa = "";
+                fetcPOAData.ispoapermanant = "";
+                fetcPOAData.istransferrights = "";
+                fetcPOAData.dast_no = "";
+                fetcPOAData.dast_no_date = "";
+                fetcPOAData.dast_no_year = "";
+                fetcPOAData.isdastverified = false;
+                fetcPOAData.verifieddastdata = "";
+                fetcPOAData.digcode = 0;
+                fetcPOAData.digname = "";
+                fetcPOAData.poa_district_code = "";
+                fetcPOAData.poa_district_name = "";
+                fetcPOAData.sro_office_code = 0;
+                fetcPOAData.sro_office_name = "";
+                fetcPOAData.deleteddate = "";
+                fetcPOAData.createddatetime = "";
+                fetcPOAData.isdeleted = false;
+                fetcPOAData.signed_file_path = "";
+                fetcPOAData.signed_file_name = "";
+                fetcPOAData.profile_pic_file_name = "";
+                fetcPOAData.profile_pic_file_path = "";
+                fetcPOAData.poa_giver_ids = "";
+                fetchPOADTL.Add(fetcPOAData);
+            }
+            application.power_of_attorney_information = fetchPOADTL;
+
+            //Get Mayat Data ,mrutyu dakhala and varas nond
+            List<FetchMayatDTLForNIC> fetchMrutyuDetails = new List<FetchMayatDTLForNIC>();
+            List<FetchVarasNondDetailsData> fetchvarasNondList = new List<FetchVarasNondDetailsData>();
+            //if (applicationDTL!.mutation_type_code == "01")
+            //{
+            if (!string.IsNullOrEmpty(applicationDTL!.mayatIDs))
+            {
+                string[] kharediNondIDs = applicationDTL.mayatIDs!.Split(",");
+                if (kharediNondIDs.Length > 0)
+                {
+                    for (int i = 0; i < kharediNondIDs.Length; i++)
+                    {
+                        FetchMayatDTLForNIC fetchmayatData = new FetchMayatDTLForNIC();
+                        fetchmayatData = FetchMayatDetails(Convert.ToInt32(kharediNondIDs[i]));
+                        if (fetchmayatData != null)
+                        {
+                            fetchMrutyuDetails.Add(fetchmayatData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchMayatDTLForNIC fetchData = new FetchMayatDTLForNIC();
+                fetchData.mayat_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationDTLapplicationid = "";
+                fetchData.mutation_cts_no_id = 0;
+                fetchData.mobileno = "";
+                fetchData.mobilenoverified = "";
+                fetchData.emailid = "";
+                fetchData.emailidverified = "";
+                fetchData.prefixcode_marathi = "";
+                fetchData.prefix_in_marathi = "";
+                fetchData.fname_in_marathi = "";
+                fetchData.mname_in_marathi = "";
+                fetchData.lname_in_marathi = "";
+                fetchData.prefixcode_eng = "";
+                fetchData.prefix_in_eng = "";
+                fetchData.fname_in_eng = "";
+                fetchData.mname_in_eng = "";
+                fetchData.lname_in_eng = "";
+                fetchData.alias_name = "";
+                fetchData.address_type = "";
+                fetchData.address = "";
+                fetchData.state = "";
+                fetchData.district = ""; ;
+                fetchData.taluka = "";
+                fetchData.city = "";
+                fetchData.flatno_plotno = "";
+                fetchData.societyname = "";
+                fetchData.mainstreet = "";
+                fetchData.landmark = "";
+                fetchData.locality = "";
+                fetchData.pincode = "";
+                fetchData.post_office_name = "";
+                fetchData.city_servey_no = "";
+                fetchData.lr_property_id = "";
+                fetchData.milkat = "";
+                fetchData.namud = "";
+                fetchData.sub_property_no = "";
+                fetchData.mutation_srno = "";
+                fetchData.owner_number = "";
+                fetchData.cts_number = "";
+                fetchData.actual_area = "";
+                fetchData.mrutyu_date = "";
+                fetchData.certificate_authority_code = "";
+                fetchData.certificate_authority_name = "";
+                fetchData.mrutyucert_no = "";
+                fetchData.mrutyu_certificate_date = "";
+                fetchData.mrutyu_certificate__name = "";
+                fetchData.mrutyu_certificate_path = "";
+                fetchData.is_name_same = "";
+                fetchData.reason = "";
+                fetchData.namecorrect_docname = "";
+                fetchData.namecorrect_docpath = "";
+                fetchData.address_proof_document_name = "";
+                fetchData.address_proof_document_path = "";
+                fetchData.signed_file_name = "";
+                fetchData.signed_file_path = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchData.createddatetime = "";
+                //Below are new fields -> Added on 31 Dec 25
+                fetchData.probet_file_name = "";
+                fetchData.probet_file_path = "";
+                fetchData.isprobet = false;
+                fetchMrutyuDetails.Add(fetchData);
+            }
+            //if (!string.IsNullOrEmpty(applicationDTL.varasIDS))
+            //{
+            //    string[] kharediNondIDs = applicationDTL.varasIDS.Split(",");
+            //    if (kharediNondIDs.Length > 0)
+            //    {
+            //        for (int i = 0; i < kharediNondIDs.Length; i++)
+            //        {
+            //            FetchVarasNondDetailsData fetchdata = new FetchVarasNondDetailsData();
+            //            fetchdata = FetchVarasData(Convert.ToInt32(kharediNondIDs[i]));
+            //            if (fetchdata != null)
+            //            {
+            //                fetchvarasNondList.Add(fetchdata);
+            //            }
+            //        }
+            //    }
+            //}
+            //}
+            application.mayatdtl = fetchMrutyuDetails;
+            //application.varasNondDetailsData = fetchvarasNondList;
+            //string mutationgivertype = "";
+            //string mutationtakertype = "";
+            //string varasnond = "";
+            //if (applicationDTL.mutation_type_code == "01")
+            //{
+            //    mutationgivertype = "मयताची माहिती";
+            //    mutationtakertype = "मृत्यू दाखला माहिती";
+            //    varasnond = "वारस नोंद माहिती";
+            //}
+            //else if (applicationDTL.mutation_type_code == "03")
+            //{
+            //    mutationgivertype = "खरेदीनोंद देणार";
+            //    mutationtakertype = "खरेदीनोंद घेणार";
+            //}
+            ////Bakshish Patra
+            //else if (applicationDTL.mutation_type_code == "04")
+            //{
+            //    mutationgivertype = "बक्षीसपत्र देणार";
+            //    mutationtakertype = "बक्षीसपत्र घेणार";
+            //}
+            ////Mrutyu Nond
+            //else if (applicationDTL.mutation_type_code == "05")
+            //{
+            //    mutationgivertype = "मृत्यूपत्र/इच्छापत्र देणार";
+            //    mutationtakertype = "मृत्यूपत्र/इच्छापत्र घेणार";
+            //}
+            ////Gahankhat Nond
+            //else if (applicationDTL.mutation_type_code == "06")
+            //{
+            //    mutationgivertype = "गाहाणखत/तारण/बोजा देणार";
+            //    mutationtakertype = "गाहाणखत/तारण/बोजा घेणार";
+
+            //}
+            ////HakkaSod Nond
+            //else if (applicationDTL.mutation_type_code == "09")
+            //{
+            //    mutationgivertype = "हक्कसोड पत्र/रिलीज डिड देणार";
+            //    mutationtakertype = "हक्कसोड पत्र/रिलीज डिड घेणार";
+            //}
+
+
+            List<FetcMutationGiverTakerDTL> fetcMutationGiverTakerDTLs = new List<FetcMutationGiverTakerDTL>();
+            if (!string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
+            {
+                string[] mutationGiverTakerIDS = applicationDTL.mutationgiverIDs.Split(",");
+                if (mutationGiverTakerIDS.Length > 0)
+                {
+                    for (int i = 0; i < mutationGiverTakerIDS.Length; i++)
+                    {
+                        FetcMutationGiverTakerDTL fetchdata = new FetcMutationGiverTakerDTL();
+                        fetchdata = FetchMutationDTL(Convert.ToInt32(mutationGiverTakerIDS[i]), applicationid);
+                        if (fetchdata != null)
+                        {
+                            fetcMutationGiverTakerDTLs.Add(fetchdata);
+                        }
+                    }
+                }
+            }
+            if (!string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
+            {
+                string[] mutationGiverTakerIDS = applicationDTL.mutationtakerIDs.Split(",");
+                if (mutationGiverTakerIDS.Length > 0)
+                {
+                    for (int i = 0; i < mutationGiverTakerIDS.Length; i++)
+                    {
+                        FetcMutationGiverTakerDTL fetchdata = new FetcMutationGiverTakerDTL();
+                        fetchdata = FetchMutationDTL(Convert.ToInt32(mutationGiverTakerIDS[i]), applicationid);
+                        if (fetchdata != null)
+                        {
+                            fetcMutationGiverTakerDTLs.Add(fetchdata);
+                        }
+                    }
+                }
+            }
+            else if (!string.IsNullOrEmpty(applicationDTL.varasIDS))
+            {
+                string[] varasids = applicationDTL.varasIDS.Split(",");
+                if (varasids.Length > 0)
+                {
+                    for (int i = 0; i < varasids.Length; i++)
+                    {
+                        FetcMutationGiverTakerDTL fetchdata = new FetcMutationGiverTakerDTL();
+                        fetchdata = FetchMutationDTL(Convert.ToInt32(varasids[i]), applicationid);
+                        if (fetchdata != null)
+                        {
+                            fetcMutationGiverTakerDTLs.Add(fetchdata);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetcMutationGiverTakerDTL fetchData = new FetcMutationGiverTakerDTL();
+                fetchData.mutation_givertaker_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.user_type_code = 0;
+                fetchData.user_type = "";
+                fetchData.prop_typepropertytypeid = "";
+                fetchData.istaker = 0;
+                fetchData.mobileno = "";
+                fetchData.mobilenoverified = "";
+                fetchData.emailid = "";
+                fetchData.emailidverified = "";
+                fetchData.prefixcode_marathi = "";
+                fetchData.prefix_in_marathi = "";
+                fetchData.fname_in_marathi = "";
+                fetchData.mname_in_marathi = "";
+                fetchData.lname_in_marathi = "";
+                fetchData.prefixcode_eng = "";
+                fetchData.prefix_in_eng = "";
+                fetchData.fname_in_eng = "";
+                fetchData.mname_in_eng = "";
+                fetchData.lname_in_eng = "";
+                fetchData.alias_name = "";
+                fetchData.company_name_in_marathi = "";
+                fetchData.company_name_in_eng = "";
+                fetchData.gender_code = "";
+                fetchData.gender_description = "";
+                fetchData.holder_type = "";
+                fetchData.dob = "";
+                fetchData.mother_name_in_marathi = "";
+                fetchData.mother_name_in_eng = "";
+                fetchData.username = "";
+                fetchData.city_servey_no = "";
+                fetchData.lr_property_id = "";
+                fetchData.sub_property_no = "";
+                fetchData.sellerid = "";
+                fetchData.buyerid = "";
+                fetchData.mutation_srno = "";
+                fetchData.owner_number = "";
+                fetchData.cts_number = "";
+                fetchData.milkat = "";
+                fetchData.namud = "";
+                fetchData.isfullareagiven = "";
+                fetchData.actual_area = "";
+                fetchData.available_area = "";
+                fetchData.mutation_area = "";
+                fetchData.address_type = "";
+                fetchData.address = "";
+                fetchData.state = "";
+                fetchData.district = "";
+                fetchData.taluka = "";
+                fetchData.city = "";
+                fetchData.flatno_plotno = "";
+                fetchData.societyname = "";
+                fetchData.mainstreet = "";
+                fetchData.landmark = "";
+                fetchData.locality = "";
+                fetchData.pincode = "";
+                fetchData.post_office_name = "";
+                fetchData.address_proof_document_name = "";
+                fetchData.address_proof_document_path = "";
+                fetchData.has_property = "";
+                fetchData.aapak = "";
+                fetchData.land_buy_area = "";
+                fetchData.account_type_code = 0;
+                fetchData.account_type_description = "";
+                fetchData.apk_code = 0;
+                fetchData.apk_description = "";
+                fetchData.khata_type_code = "";
+                fetchData.khata_type_name = "";
+                fetchData.owner_status_code = "";
+                fetchData.owner_status_description = "";
+                fetchData.khatano = "";
+                fetchData.ulpin = "";
+                fetchData.district_code = "";
+                fetchData.district_name_in_marathi = "";
+                fetchData.district_name_in_eng = "";
+                fetchData.village_code = "";
+                fetchData.village_name = "";
+                fetchData.ofc_code = "";
+                fetchData.ofc_name = "";
+                fetchData.relation_code = 0;
+                fetchData.relation_name = "";
+                fetchData.varas_relation_code = 0;
+                fetchData.varas_relation_name = "";
+                fetchData.institute_code = 0;
+                fetchData.institute_description = "";
+                fetchData.bank_name_in_marathi = "";
+                fetchData.bank_name_in_english = "";
+                fetchData.ifsc = "";
+                fetchData.boja_value = "";
+                fetchData.boja_date = "";
+                fetchData.boja_period = "";
+                fetchData.benefit_amt = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchData.createddatetime = "";
+                fetchData.signed_file_name = "";
+                fetchData.signed_file_path = "";
+                fetchData.profile_pic_file_name = "";
+                fetchData.profile_pic_file_path = "";
+                fetchData.mutation_cts_no_id = 0;
+                //Below are new fields -> Added on 31 Dec 25
+                fetchData.owner_village_code = "";
+                fetchData.entry_bracketed = "";
+                fetchData.entry_date = "";
+                fetchData.owner_bracketed = "";
+                fetchData.owner_name = "";
+                fetcMutationGiverTakerDTLs.Add(fetchData);
+            }
+
+            //Fetch Bhadepatta Info Data
+            List<FetchBhadepattaInfoDTLForNIC> fetchBhadepattaInfoList = new List<FetchBhadepattaInfoDTLForNIC>();
+            if (applicationDTL.mutation_type_code == "10")
+            {
+                FetchBhadepattaInfoDTLForNIC fetchBhadepattaInfo = new FetchBhadepattaInfoDTLForNIC();
+                fetchBhadepattaInfo = FetchBhadepattaInfoDTL(applicationid);
+                fetchBhadepattaInfoList.Add(fetchBhadepattaInfo);
+            }
+            else
+            {
+                FetchBhadepattaInfoDTLForNIC fetchBhadepattaInfo = new FetchBhadepattaInfoDTLForNIC();
+                fetchBhadepattaInfo.Info_id = 0;
+                fetchBhadepattaInfo.userid = 0;
+                fetchBhadepattaInfo.applicationid = "";
+                fetchBhadepattaInfo.bhadepattaTenureYear = "";
+                fetchBhadepattaInfo.bhadepattaTenureMonth = "";
+                fetchBhadepattaInfo.bhadepattaAmount = "";
+                fetchBhadepattaInfo.leaseperiod = true;
+                fetchBhadepattaInfo.bhadepattaToDate = "";
+                fetchBhadepattaInfo.bhadepattaFromDate = "";
+                fetchBhadepattaInfo.createdDateTime = "";
+                fetchBhadepattaInfo.deletedDateTime = "";
+                fetchBhadepattaInfo.isDeleted = false;
+                fetchBhadepattaInfoList.Add(fetchBhadepattaInfo);
+            }
+
+            //Fetch Hibanama Info Data
+            List<FetchHibanamaWitnessDataForNIC> fetchHibanamaWitnessInfoDataList = new List<FetchHibanamaWitnessDataForNIC>();
+            if (!string.IsNullOrEmpty(applicationDTL.witnessids))
+            {
+                string[] witnessIds = applicationDTL.witnessids.Split(",");
+                if (witnessIds.Length > 0)
+                {
+                    for (int i = 0; i < witnessIds.Length; i++)
+                    {
+                        FetchHibanamaWitnessDataForNIC fetchData = new FetchHibanamaWitnessDataForNIC();
+                        fetchData = FetchHibanamaWitnessData(Convert.ToInt32(witnessIds[i]));
+                        if (fetchData != null)
+                        {
+                            fetchHibanamaWitnessInfoDataList.Add(fetchData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchHibanamaWitnessDataForNIC fetchData = new FetchHibanamaWitnessDataForNIC();
+                fetchData.witness_info_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.permission_no = "";
+                fetchData.permission_date = "";
+                fetchData.prefixcode_marathi = "";
+                fetchData.prefix_in_marathi = "";
+                fetchData.fname_in_marathi = "";
+                fetchData.mname_in_marathi = "";
+                fetchData.lname_in_marathi = "";
+                fetchData.prefixcode_eng = "";
+                fetchData.prefix_in_eng = "";
+                fetchData.fname_in_eng = "";
+                fetchData.mname_in_eng = "";
+                fetchData.lname_in_eng = "";
+                fetchData.alias_name = "";
+                fetchData.address_type = "";
+                fetchData.address = "";
+                fetchData.state = "";
+                fetchData.district = "";
+                fetchData.taluka = "";
+                fetchData.city = "";
+                fetchData.flatno_plotno = "";
+                fetchData.societyname = "";
+                fetchData.mainstreet = "";
+                fetchData.landmark = "";
+                fetchData.locality = "";
+                fetchData.pincode = "";
+                fetchData.post_office_name = "";
+                fetchData.address_proof_document_name = "";
+                fetchData.address_proof_document_path = "";
+                fetchData.mobileno = "";
+                fetchData.mobilenoverified = "";
+                fetchData.emailid = "";
+                fetchData.emailidverified = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchHibanamaWitnessInfoDataList.Add(fetchData);
+            }
+
+            //Fetch Error Correction data
+            List<FetchErrorCorrectionDataForNIC> fetchErrorCorrectionDataList = new List<FetchErrorCorrectionDataForNIC>();
+            if (!string.IsNullOrEmpty(applicationDTL.errorcorrectionids))
+            {
+                string[] errorcorrectionIDS = applicationDTL.errorcorrectionids.Split(",");
+                if (errorcorrectionIDS.Length > 0)
+                {
+                    for (int i = 0; i < errorcorrectionIDS.Length; i++)
+                    {
+                        FetchErrorCorrectionDataForNIC fetchErrorCorrectionData = new FetchErrorCorrectionDataForNIC();
+                        fetchErrorCorrectionData = FetchErrorCorrectionData(Convert.ToInt32(errorcorrectionIDS[i]));
+                        if (fetchErrorCorrectionData != null)
+                        {
+                            fetchErrorCorrectionDataList.Add(fetchErrorCorrectionData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchErrorCorrectionDataForNIC fetchData = new FetchErrorCorrectionDataForNIC();
+                fetchData.error_correction_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.village_code = "";
+                fetchData.sub_property_no = "";
+                fetchData.city_servey_no = "";
+                fetchData.lr_property_id = "";
+                fetchData.milkat = "";
+                fetchData.namud = "";
+                //fetchData.var_village_code = "";
+                //fetchData.var_cts_number =
+                //fetchData.var_cts_puid =
+                //fetchData.var_mutation_srno =
+                //fetchData.var_entry_date =
+                //fetchData.var_mutation_number =
+                //fetchData.var_mutation_date =
+                //fetchData.var_sro_office_name_marathi =
+                //fetchData.var_sro_office_name_english =
+                //fetchData.var_document_number =
+                //fetchData.var_document_year =
+                //fetchData.var_document_date =
+                //fetchData.var_entry_details =
+                //fetchData.var_owner_details =
+                fetchData.reason = "";
+                fetchData.address_type = "";
+                fetchData.emailid = "";
+                fetchData.mobileno = "";
+                fetchData.mobilenoverified = "";
+                fetchData.address = "";
+                fetchData.state = "";
+                fetchData.district = "";
+                fetchData.taluka = "";
+                fetchData.city = "";
+                fetchData.flatno_plotno = "";
+                fetchData.societyname = "";
+                fetchData.mainstreet = "";
+                fetchData.landmark = "";
+                fetchData.locality = "";
+                fetchData.pincode = "";
+                fetchData.post_office_name = "";
+                fetchData.address_proof_document_name = "";
+                fetchData.address_proof_document_path = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchErrorCorrectionDataList.Add(fetchData);
+            }
+
+            // Fetch Navatbadal Data
+            List<FetchNavatBadalDataForNIC> fetchNavatBadalDataList = new List<FetchNavatBadalDataForNIC>();
+            if (!string.IsNullOrEmpty(applicationDTL.namechangeids))
+            {
+                string[] namechangeIDS = applicationDTL.namechangeids.Split(",");
+                if (namechangeIDS.Length > 0)
+                {
+                    for (int i = 0; i < namechangeIDS.Length; i++)
+                    {
+                        FetchNavatBadalDataForNIC fetchNavatBadalData = new FetchNavatBadalDataForNIC();
+                        fetchNavatBadalData = FetchNavatBadalData(Convert.ToInt32(namechangeIDS[i]));
+                        if (fetchNavatBadalData != null)
+                        {
+                            fetchNavatBadalDataList.Add(fetchNavatBadalData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchNavatBadalDataForNIC fetchData = new FetchNavatBadalDataForNIC();
+                fetchData.name_change_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.village_code = "";
+                fetchData.subpropno = "";
+                fetchData.nabhu = "";
+                fetchData.lrpropertyuid = "";
+                fetchData.milkat = "";
+                fetchData.namud = "";
+                fetchData.name_change_by_code = 0;
+                fetchData.name_change_by_description = "";
+                fetchData.name_change_no = "";
+                fetchData.name_change_date = "";
+                // selectedMutation -> data from EPCIS
+                fetchData.selected_village_code = "";
+                fetchData.selected_cts_number = "";
+                fetchData.selected_mutation_srno = "";
+                fetchData.selected_entry_date = "";
+                fetchData.selected_entry_bracketed = "";
+                fetchData.selected_owner_number = "";
+                fetchData.selected_owner_name = "";
+                fetchData.selected_first_name = "";
+                fetchData.selected_middle_name = "";
+                fetchData.selected_last_name = "";
+                fetchData.selected_nick_name = "";
+                fetchData.selected_owner_bracketed = "";
+                fetchData.selected_area_bracketed = "";
+                fetchData.selected_email_id = "";
+                fetchData.selected_owner_cell_number = "";
+                fetchData.selected_pincode = "";
+                fetchData.selected_owner_type = "";
+                fetchData.selected_apk_code = "";
+                fetchData.selected_apk_name = "";
+                fetchData.selected_flat_or_house_number = "";
+                fetchData.selected_building_number = "";
+                fetchData.selected_road = "";
+                fetchData.selected_city_or_village = "";
+                fetchData.selected_taluka_name = "";
+                fetchData.selected_district_name = "";
+                fetchData.selected_state_name = "";
+                fetchData.selected_gender_code = "";
+                fetchData.selected_date_of_birth = "";
+                fetchData.selected_owner_area = "";
+                fetchData.selected_owner_area_bracketed = "";
+                // Updated Details
+                fetchData.updated_usertype = 0;
+                fetchData.updated_usertypelabel = "";
+                fetchData.updated_prefixcode_marathi = "";
+                fetchData.updated_prefix_in_marathi = "";
+                fetchData.updated_fname_in_marathi = "";
+                fetchData.updated_mname_in_marathi = "";
+                fetchData.updated_lname_in_marathi = "";
+                fetchData.updated_prefixcode_eng = "";
+                fetchData.updated_prefix_in_eng = "";
+                fetchData.updated_fname_in_eng = "";
+                fetchData.updated_mname_in_eng = "";
+                fetchData.updated_lname_in_eng = "";
+                fetchData.company_name_in_marathi = "";
+                fetchData.company_name_in_eng = "";
+                // Address Fields
+                fetchData.address_type = "";
+                fetchData.emailid = "";
+                fetchData.mobileno = "";
+                fetchData.mobilenoverified = "";
+                fetchData.address = "";
+                fetchData.state = "";
+                fetchData.district = "";
+                fetchData.taluka = "";
+                fetchData.city = "";
+                fetchData.flatno_plotno = "";
+                fetchData.societyname = "";
+                fetchData.mainstreet = "";
+                fetchData.landmark = "";
+                fetchData.locality = "";
+                fetchData.pincode = "";
+                fetchData.postofficename = "";
+                fetchData.address_proof_document_name = "";
+                fetchData.address_proof_document_path = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchNavatBadalDataList.Add(fetchData);
+            }
+
+            //Fetch Attachment Order Data
+            List<FetchAttachmentOrderTBLInfoForNIC> fetchAttachmentOrderTBLInfoList = new List<FetchAttachmentOrderTBLInfoForNIC>();
+            if (!string.IsNullOrEmpty(applicationDTL.attachmentorderids))
+            {
+                string[] attachmentorderIDS = applicationDTL.attachmentorderids.Split(",");
+                if (attachmentorderIDS.Length > 0)
+                {
+                    for (int i = 0; i < attachmentorderIDS.Length; i++)
+                    {
+                        FetchAttachmentOrderTBLInfoForNIC fetchAttachmentOrderTBLInfo = new FetchAttachmentOrderTBLInfoForNIC();
+                        fetchAttachmentOrderTBLInfo = FetchAttachmentOrderData(Convert.ToInt32(attachmentorderIDS[i]));
+                        if (fetchAttachmentOrderTBLInfo != null)
+                        {
+                            fetchAttachmentOrderTBLInfoList.Add(fetchAttachmentOrderTBLInfo);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchAttachmentOrderTBLInfoForNIC fetchData = new FetchAttachmentOrderTBLInfoForNIC();
+                fetchData.attachmentorderid = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.nabhu_no = "";
+                fetchData.mutation_srno = "";
+                fetchData.owner_number = "";
+                fetchData.owner_name = "";
+                fetchData.area = "";
+                fetchData.agencies_issuing_attachment_orders = "";
+                fetchData.name_of_the_agency_issuing_the_attachment_order = "";
+                fetchData.address_of_the_agency_issuing_the_attachment_order = "";
+                fetchData.attachment_order_number = "";
+                fetchData.date_of_the_attachment_order = "";
+                fetchData.is_the_attachment_order_issued_by_a_credit_society_or_a_bank = "";
+                fetchData.recovery_cert_under_section_101_issued_by_the_cooperative_officer = "";
+                fetchData.recovery_cert_issued_by_the_cooperative_officer_in_91 = "";
+                fetchData.recovery_cert_for_105_issued_by_the_liquidator = "";
+                fetchData.orbiter_order_no = "";
+                fetchData.orbiter_order_date = "";
+                fetchData.by_order_recording_entries_that_were_missed_during_computerization = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchAttachmentOrderTBLInfoList.Add(fetchData);
+            }
+
+            // Fetch Declaration Entry Info
+
+            List<FetchDeclarationEntryInfoForNIC> fetchDeclarationEntryList = new List<FetchDeclarationEntryInfoForNIC>();
+            if (!string.IsNullOrEmpty(applicationDTL.declarationentryids))
+            {
+                string[] declarationentryIDS = applicationDTL.declarationentryids.Split(",");
+                if (declarationentryIDS.Length > 0)
+                {
+                    for (int i = 0; i < declarationentryIDS.Length; i++)
+                    {
+                        FetchDeclarationEntryInfoForNIC fetchDeclarationEntryInfo = new FetchDeclarationEntryInfoForNIC();
+                        fetchDeclarationEntryInfo = FetchDeclarationEntryInfoData(Convert.ToInt32(declarationentryIDS[i]));
+                        if (fetchDeclarationEntryInfo != null)
+                        {
+                            fetchDeclarationEntryList.Add(fetchDeclarationEntryInfo);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchDeclarationEntryInfoForNIC fetchData = new FetchDeclarationEntryInfoForNIC();
+                fetchData.declarationid = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.type_of_authority_approving_the_construction_plan_code = 0;
+                fetchData.type_of_authority_approving_the_construction_plan = "";
+                fetchData.company_name = "";
+                fetchData.map_approval_order_no = "";
+                fetchData.map_approval_order_date = "";
+                fetchData.construction_start_cert_no = "";
+                fetchData.construction_start_cert_date = "";
+                fetchData.occupancy_certificate_file_name = "";
+                fetchData.occupancy_certificate_file_path = "";
+                fetchData.occupancy_certificate_date = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchDeclarationEntryList.Add(fetchData);
+            }
+
+            //            //Mutation Giver 
+            //            List<dynamic> giver = mutationgiverData(applicationDTL);
+            ////Mutation Taker
+            //List<dynamic> taker = mutationtakerData(applicationDTL);
+
+            //List<MutationList> mutation = new List<MutationList>();
+            //if (applicationDTL.mutation_type_code == "01")
+            //{
+            //    mutation.Add(new MutationList { type = mutationgivertype, value = fetchmayatinfoList });
+            //    mutation.Add(new MutationList { type = mutationtakertype, value = fetchMrutyuDetails });
+            //    mutation.Add(new MutationList { type = varasnond, value = fetchvarasNondList });
+            //}
+            //else
+            //{
+            //mutation.Add(new MutationList { type = mutationgivertype, value = giver });
+            //mutation.Add(new MutationList { type = mutationtakertype, value = taker });
+            //}
+
+            application.mutationgivertakerdtls = fetcMutationGiverTakerDTLs;
+            application.bhadepattaInfoDtl = fetchBhadepattaInfoList;
+            application.errorcorrectiondtls = fetchErrorCorrectionDataList;
+            application.name_change_dtl = fetchNavatBadalDataList;
+            application.witness_info = fetchHibanamaWitnessInfoDataList;
+            application.attachment_order_info = fetchAttachmentOrderTBLInfoList;
+            application.declaration_entry_info= fetchDeclarationEntryList;
+            //Document Data
+
+            var nabhuNoList = _context.mutationCTSNoDTLs.Include(app => app.applicationDTL).Where(app => app.applicationDTL!.applicationid == applicationid).Select(a => a.selected_city_servey_no).ToList();
+            //string nabh  = String.Join(", ", nabhuNoList);
+            //List<FetchUploadedDocumentsForNIC> document = new List<FetchUploadedDocumentsForNIC>();
+            //foreach (string? nabhu in nabhuNoList)
+            //{
+            //    var data = uploadDocuments(nabhu!, applicationid);
+            //    if (data != null)
+            //    {
+            //        document.Add(data);
+            //    }
+            //}
+            //application.uploaded_documents_dtl = document;
+
+            List<FetchUploadedDocumentDataForNIC> fetchUploadedDocumentsList = new List<FetchUploadedDocumentDataForNIC>();
+            if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.uploadedDocIDs))
+            {
+                string[] uploadedDocIDs = applicationDTL.uploadedDocIDs.Split(",");
+
+                if (uploadedDocIDs.Length > 0)
+                {
+                    for (int i = 0; i < uploadedDocIDs.Length; i++)
+                    {
+                        FetchUploadedDocumentDataForNIC fetchUploadedDocumentsData = new FetchUploadedDocumentDataForNIC();
+                        fetchUploadedDocumentsData = FetchUploadedDocumentDTLs(Convert.ToInt32(uploadedDocIDs[i]));
+                        if (fetchUploadedDocumentsData != null)
+                        {
+                            fetchUploadedDocumentsList.Add(fetchUploadedDocumentsData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchUploadedDocumentDataForNIC fetchData = new FetchUploadedDocumentDataForNIC();
+                fetchData.uploaded_doc_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.document_type_code = "";
+                fetchData.document_type = "";
+                fetchData.city_servey_no = "";
+                fetchData.document_name = "";
+                fetchData.document_path = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchUploadedDocumentsList.Add(fetchData);
+            }
+            application.uploaded_documents_dtl = fetchUploadedDocumentsList;
+            return application;
+        }
+
         public ApplicationDTL FetchApplicationData(string applicationid)
         {
             try
@@ -1053,1032 +2170,7 @@ namespace PDEWebAPIS.Services
             }
         }
 
-        public ApplicationDataForNIC GetApplicationDataForNIC(int userid, string applicationid)
-        {
-            ApplicationDataForNIC application = new ApplicationDataForNIC();
-            // Fetch Registered User Data
-            List<FetchUserDataForNIC> userDataList = new List<FetchUserDataForNIC>();
 
-            FetchUserDataForNIC userData = new FetchUserDataForNIC();
-            userData = FetchUserData(userid);
-            userDataList.Add(userData);
-            application.usermaster = userDataList;
-            //Fetch All Application Details
-            List<FetchApplicationDTLsForNIC> applicationDTLList = new List<FetchApplicationDTLsForNIC>();
-            ApplicationDTL applicationDTL = FetchApplicationData(applicationid);
-
-            if (applicationDTL == null)
-            {
-                throw new HandleException("Application Not Found");
-            }
-            //Get Application Details
-            FetchApplicationDTLsForNIC fetchApplicationDTLsForNIC = new FetchApplicationDTLsForNIC();
-            fetchApplicationDTLsForNIC = GetApplicationDtls(applicationDTL);
-            applicationDTLList.Add(fetchApplicationDTLsForNIC);
-
-            application.applicationdtl = applicationDTLList;
-
-            //Get All Applicant Details
-            List<FetchApplicantsDataForNIC> applicantsList = new List<FetchApplicantsDataForNIC>();
-            if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.applicantIDs))
-            {
-                string[] applicantIDS = applicationDTL.applicantIDs.Split(",");
-
-                if (applicantIDS.Length > 0)
-                {
-                    for (int i = 0; i < applicantIDS.Length; i++)
-                    {
-                        FetchApplicantsDataForNIC applicant = new FetchApplicantsDataForNIC();
-                        applicant = FetchApplicantData(Convert.ToInt32(applicantIDS[i]));
-                        if (applicant != null)
-                        {
-                            applicantsList.Add(applicant);
-                        }
-                    }
-                }
-            }
-            application.applicantmaster = applicantsList;
-
-            //Get All Mutation CTS Data
-            List<FetchMutationCTSNoDataForNIC> mutationCTSNoList = new List<FetchMutationCTSNoDataForNIC>();
-            if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.mutation_cts_nos))
-            {
-                string[] mutationCTSNoIDs = applicationDTL.mutation_cts_nos.Split(",");
-
-                if (mutationCTSNoIDs.Length > 0)
-                {
-                    for (int i = 0; i < mutationCTSNoIDs.Length; i++)
-                    {
-                        FetchMutationCTSNoDataForNIC mutationCTSNoData = new FetchMutationCTSNoDataForNIC();
-                        mutationCTSNoData = FetchMutationCTSData(Convert.ToInt32(mutationCTSNoIDs[i]));
-                        if (mutationCTSNoData != null)
-                        {
-                            mutationCTSNoList.Add(mutationCTSNoData);
-                        }
-                    }
-
-                }
-            }
-            else
-            {
-                FetchMutationCTSNoDataForNIC fetchData = new FetchMutationCTSNoDataForNIC();
-                fetchData.mutation_cts_no_id = 0;
-                fetchData.usermasteruserid = 0;
-                fetchData.applicationdtlapplicationid = "";
-                fetchData.what_is_mentioned_in_the_doc = "";
-                fetchData.village_or_peth_code = "";
-                fetchData.village_or_peth_name = "";
-                fetchData.village_english_name = "";
-                fetchData.village_lgd_code = "";
-                fetchData.zone_code = "";
-                fetchData.amount = "";
-                fetchData.mutation_modification_type = "";
-                fetchData.city_servey_no_mentioned_in_application = "";
-                fetchData.servey_no = "";
-                fetchData.selected_city_servey_no = "";
-                fetchData.lr_property_uid = "";
-                fetchData.application_income_type = "";
-                fetchData.city_servey_area_in_sq_m = "";
-                fetchData.building_name = "";
-                fetchData.floor_type = 0;
-                fetchData.floor_desc = "";
-                fetchData.floor_order_by = 0;
-                fetchData.floor_no = "";
-                fetchData.unit_code_156 = 0;
-                fetchData.unit_name_156 = "";
-                fetchData.unit_no = "";
-                fetchData.buildup_area_in_sq_m = "";
-                fetchData.carpet_area_in_sq_m = "";
-                fetchData.terrace_area_in_sq_m = "";
-                fetchData.parking_no = "";
-                fetchData.parking_area_in_sq_m = "";
-                fetchData.shares_in_percent = "";
-                fetchData.nic_flat_details = "";
-                fetchData.flat_bulit_up_area = "";
-                fetchData.sub_property_id = "";
-                fetchData.createddatetime = "";
-                fetchData.isdeleted = false;
-                fetchData.deleteddate = "";
-                mutationCTSNoList.Add(fetchData);
-            }
-            application.mutation_cts_no_dtl = mutationCTSNoList;
-
-            //Get All Dast information
-            List<FetchDastInformationDataForNIC> fetchDastInformationList = new List<FetchDastInformationDataForNIC>();
-            if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.dastIDs))
-            {
-                string[] dastIDs = applicationDTL.dastIDs.Split(",");
-                if (dastIDs.Length > 0)
-                {
-                    for (int i = 0; i < dastIDs.Length; i++)
-                    {
-                        FetchDastInformationDataForNIC fetchDastInformationData = new FetchDastInformationDataForNIC();
-                        fetchDastInformationData = FetchDastInformationData(Convert.ToInt32(dastIDs[i]));
-                        if (fetchDastInformationData != null)
-                        {
-                            fetchDastInformationList.Add(fetchDastInformationData);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                FetchDastInformationDataForNIC fetchData = new FetchDastInformationDataForNIC();
-                fetchData.dast_id = 0;
-                fetchData.usermasteruserid = 0;
-                fetchData.applicationdtlapplicationid = "";
-                fetchData.dasttype = "";
-                fetchData.division_code = "";
-                fetchData.division_name = "";
-                fetchData.districtcode = "";
-                fetchData.districtname = "";
-                fetchData.office_of_the_second_registrar_code = "";
-                fetchData.office_of_the_second_registrar_name = "";
-                fetchData.registered_dast_no = "";
-                fetchData.registered_dast_date = "";
-                fetchData.registered_dast_year = "";
-                fetchData.dastnabhu = "";
-                fetchData.remarks = "";
-                fetchData.isdastverified = false;
-                fetchData.verifieddastdata = "";
-                fetchData.createddatetime = "";
-                fetchData.isdeleted = false;
-                fetchData.deleteddate = "";
-                fetchDastInformationList.Add(fetchData);
-            }
-            application.dast_information = fetchDastInformationList;
-
-            //Get All courtClaim
-            List<FetchCourtClaimInformationDataForNIC> fetchCourtClaimInformationList = new List<FetchCourtClaimInformationDataForNIC>();
-            if (applicationDTL!.Is_the_claim_pending_before_the_court == true)
-            {
-                if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.courtClaimIDs))
-                {
-                    string[] courtClaimIDS = applicationDTL.courtClaimIDs.Split(",");
-                    if (courtClaimIDS.Length > 0)
-                    {
-                        for (int i = 0; i < courtClaimIDS.Length; i++)
-                        {
-                            FetchCourtClaimInformationDataForNIC fetchCourtClaimInformationData = new FetchCourtClaimInformationDataForNIC();
-                            fetchCourtClaimInformationData = FetchCourtClaimInformation(Convert.ToInt32(courtClaimIDS[i]));
-                            if (fetchCourtClaimInformationData != null)
-                            {
-                                fetchCourtClaimInformationList.Add(fetchCourtClaimInformationData);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                FetchCourtClaimInformationDataForNIC fetchCourtClaimInformationData = new FetchCourtClaimInformationDataForNIC();
-                fetchCourtClaimInformationData.court_claim_id = 0;
-                fetchCourtClaimInformationData.usermasteruserid = 0;
-                fetchCourtClaimInformationData.applicationdtlapplicationid = "";
-                fetchCourtClaimInformationData.court_case_code = "";
-                fetchCourtClaimInformationData.court_case_name = "";
-                fetchCourtClaimInformationData.court_case_type_code = "";
-                fetchCourtClaimInformationData.court_case_type_name = "";
-                fetchCourtClaimInformationData.lr_property_uid = "";
-                fetchCourtClaimInformationData.city_servey_no = "";
-                fetchCourtClaimInformationData.order_details = "";
-                fetchCourtClaimInformationData.stay_order = "";
-                fetchCourtClaimInformationData.sub_property_no = "";
-                fetchCourtClaimInformationData.createddatetime = "";
-                fetchCourtClaimInformationData.isdeleted = false;
-                fetchCourtClaimInformationData.deleteddate = "";
-                fetchCourtClaimInformationList.Add(fetchCourtClaimInformationData);
-            }
-            application.court_claim_information = fetchCourtClaimInformationList;
-
-            //Get Power of Attorney Giver & Taker
-            List<FetchPOADataForNIC> fetchPOADTL = new List<FetchPOADataForNIC>();
-            //List<FetchPOAForGiverDataForNIC> fetchPowerOfAttorneyGiverInformationList = new List<FetchPOAForGiverDataForNIC>();
-            //List<FetchPOAForTakerDataForNIC> fetchPowerOfAttorneyInformationList = new List<FetchPOAForTakerDataForNIC>();
-            if (applicationDTL!.do_you_have_power_of_attorney == true)
-            {
-                if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.powerOfAttorneyIDs))
-                {
-                    string[] poaids = applicationDTL.powerOfAttorneyIDs.Split(",");
-                    if (poaids.Length > 0)
-                    {
-                        for (int i = 0; i < poaids.Length; i++)
-                        {
-                            FetchPOADataForNIC fetcPOAData = new FetchPOADataForNIC();
-                            fetcPOAData = FetchPOADTLForNIC(Convert.ToInt32(poaids[i]));
-                            if (fetcPOAData != null)
-                            {
-                                fetchPOADTL.Add(fetcPOAData);
-                            }
-                        }
-                    }
-                }
-
-                ////Giver
-                //if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.powerOfAttorneyIDs))
-                //{
-                //    string[] powerOfAttorneyIDS = applicationDTL.powerOfAttorneyIDs.Split(",");
-
-                //    if (powerOfAttorneyIDS.Length > 0)
-                //    {
-                //        for (int i = 0; i < powerOfAttorneyIDS.Length; i++)
-                //        {
-                //            FetchPOAForGiverDataForNIC fetchPowerOfAttorneyInformationData = new FetchPOAForGiverDataForNIC();
-                //            fetchPowerOfAttorneyInformationData = FetchPowerOfAttorneyInfoForGiver(Convert.ToInt32(powerOfAttorneyIDS[i]));
-                //            if (fetchPowerOfAttorneyInformationData != null)
-                //            {
-                //                fetchPowerOfAttorneyGiverInformationList.Add(fetchPowerOfAttorneyInformationData);
-                //            }
-                //        }
-                //    }
-                //}
-                //Taker
-                //if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.powerOfAttorneyIDs))
-                //{
-                //    string[] powerOfAttorneyIDS = applicationDTL.powerOfAttorneyIDs.Split(",");
-
-                //    if (powerOfAttorneyIDS.Length > 0)
-                //    {
-                //        FetchGiverData fetchGiverData = new FetchGiverData();
-                //        fetchGiverData = applicationServices.FetchPOAGiverData(applicationid);
-                //        for (int i = 0; i < powerOfAttorneyIDS.Length; i++)
-                //        {
-                //            FetchPOAForTakerDataForNIC fetchPowerOfAttorneyInformationData = new FetchPOAForTakerDataForNIC();
-                //            fetchPowerOfAttorneyInformationData = FetchPowerOfAttorneyInfoForTaker(Convert.ToInt32(powerOfAttorneyIDS[i]));
-                //            if (fetchPowerOfAttorneyInformationData != null)
-                //            {
-                //                //if (fetchGiverData != null)
-                //                //{
-                //                //    for (int j = 0; j < fetchGiverData.giver_names_in_marathi!.Count; j++)
-                //                //    {
-                //                //        if (j == 0)
-                //                //        {
-                //                //            fetchPowerOfAttorneyInformationData.giver_name_in_marathi = fetchGiverData.giver_names_in_marathi[j];
-                //                //            fetchPowerOfAttorneyInformationData.giver_name_in_english = fetchGiverData.giver_names_in_english![j];
-                //                //        }
-                //                //        else
-                //                //        {
-                //                //            fetchPowerOfAttorneyInformationData.giver_name_in_marathi = fetchPowerOfAttorneyInformationData.giver_name_in_marathi + ", " + fetchGiverData.giver_names_in_marathi[j];
-                //                //            fetchPowerOfAttorneyInformationData.giver_name_in_english = fetchPowerOfAttorneyInformationData.giver_name_in_english + ", " + fetchGiverData.giver_names_in_english![j];
-                //                //        }
-                //                //    }
-                //                //}
-                //                fetchPowerOfAttorneyInformationList.Add(fetchPowerOfAttorneyInformationData);
-                //            }
-                //        }
-                //    }
-                //}
-            }
-            else
-            {
-                FetchPOADataForNIC fetcPOAData = new FetchPOADataForNIC();
-                fetcPOAData.power_of_attorney_id = 0;
-                fetcPOAData.usermasteruserid = 0;
-                fetcPOAData.applicationdtlapplicationid = "";
-                fetcPOAData.power_of_attorney_code = 0;
-                fetcPOAData.is_taker = false;
-                fetcPOAData.usertype_code = 0;
-                fetcPOAData.usertype = "";
-                fetcPOAData.mutation_id = 0;
-                fetcPOAData.mobileno = "";
-                fetcPOAData.mobilenoverified = "";
-                fetcPOAData.emailid = "";
-                fetcPOAData.emailidverified = "";
-                fetcPOAData.prefixcode_marathi = "";
-                fetcPOAData.prefix_in_marathi = "";
-                fetcPOAData.fname_in_marathi = "";
-                fetcPOAData.mname_in_marathi = "";
-                fetcPOAData.lname_in_marathi = "";
-                fetcPOAData.prefixcode_eng = "";
-                fetcPOAData.prefix_in_eng = "";
-                fetcPOAData.fname_in_eng = "";
-                fetcPOAData.mname_in_eng = "";
-                fetcPOAData.lname_in_eng = "";
-                fetcPOAData.company_name_in_marathi = "";
-                fetcPOAData.company_name_in_eng = "";
-                fetcPOAData.username = "";
-                fetcPOAData.alias_name = "";
-                fetcPOAData.gender_code = "";
-                fetcPOAData.gender_description = "";
-                fetcPOAData.dob = "";
-                fetcPOAData.mother_name_in_marathi = "";
-                fetcPOAData.mother_name_in_eng = "";
-                fetcPOAData.address_type = "";
-                fetcPOAData.address = "";
-                fetcPOAData.state = "";
-                fetcPOAData.district = "";
-                fetcPOAData.taluka = "";
-                fetcPOAData.city = "";
-                fetcPOAData.flatno_plotno = "";
-                fetcPOAData.societyname = "";
-                fetcPOAData.mainstreet = "";
-                fetcPOAData.landmark = "";
-                fetcPOAData.locality = "";
-                fetcPOAData.pincode = "";
-                fetcPOAData.postofficename = "";
-                fetcPOAData.address_proof_document_name = "";
-                fetcPOAData.address_proof_document_path = "";
-                fetcPOAData.city_servey_no = "";
-                fetcPOAData.lr_property_id = "";
-                fetcPOAData.sub_property_no = "";
-                fetcPOAData.owner_of_property_in_maharashtra = false;
-                fetcPOAData.mutation_srno = "";
-                fetcPOAData.owner_number = "";
-                fetcPOAData.cts_number = "";
-                fetcPOAData.village_code = "";
-                fetcPOAData.village_name = "";
-                fetcPOAData.propertytypeid = 0;
-                fetcPOAData.property_district_code = "";
-                fetcPOAData.property_district_name_in_marathi = "";
-                fetcPOAData.property_district_name_in_english = "";
-                fetcPOAData.property_taluka_code = "";
-                fetcPOAData.property_taluka_name = "";
-                fetcPOAData.property_city_code = "";
-                fetcPOAData.property_city_name = "";
-                fetcPOAData.khateno = "";
-                fetcPOAData.ulpin = "";
-                fetcPOAData.khata_type_code = "";
-                fetcPOAData.khata_type_name = "";
-                fetcPOAData.owner_status_code = "";
-                fetcPOAData.owner_status_description = "";
-                fetcPOAData.attornytype_code = 0;
-                fetcPOAData.attornytype_desc = "";
-                fetcPOAData.landbuyarea = "";
-                fetcPOAData.ispoaispartofdast = "";
-                fetcPOAData.isdeclerationinvolvedinpoa = "";
-                fetcPOAData.ispoapermanant = "";
-                fetcPOAData.istransferrights = "";
-                fetcPOAData.dast_no = "";
-                fetcPOAData.dast_no_date = "";
-                fetcPOAData.dast_no_year = "";
-                fetcPOAData.isdastverified = false;
-                fetcPOAData.verifieddastdata = "";
-                fetcPOAData.digcode = 0;
-                fetcPOAData.digname = "";
-                fetcPOAData.poa_district_code = "";
-                fetcPOAData.poa_district_name = "";
-                fetcPOAData.sro_office_code = 0;
-                fetcPOAData.sro_office_name = "";
-                fetcPOAData.deleteddate = "";
-                fetcPOAData.createddatetime = "";
-                fetcPOAData.isdeleted = false;
-                fetcPOAData.signed_file_path = "";
-                fetcPOAData.signed_file_name = "";
-                fetcPOAData.profile_pic_file_name = "";
-                fetcPOAData.profile_pic_file_path = "";
-                fetcPOAData.poa_giver_ids = "";
-                fetchPOADTL.Add(fetcPOAData);
-            }
-            application.power_of_attorney_information = fetchPOADTL;
-
-            //Get Mayat Data ,mrutyu dakhala and varas nond
-            List<FetchMayatDTLForNIC> fetchMrutyuDetails = new List<FetchMayatDTLForNIC>();
-            List<FetchVarasNondDetailsData> fetchvarasNondList = new List<FetchVarasNondDetailsData>();
-            //if (applicationDTL!.mutation_type_code == "01")
-            //{
-            if (!string.IsNullOrEmpty(applicationDTL!.mayatIDs))
-            {
-                string[] kharediNondIDs = applicationDTL.mayatIDs!.Split(",");
-                if (kharediNondIDs.Length > 0)
-                {
-                    for (int i = 0; i < kharediNondIDs.Length; i++)
-                    {
-                        FetchMayatDTLForNIC fetchmayatData = new FetchMayatDTLForNIC();
-                        fetchmayatData = FetchMayatDetails(Convert.ToInt32(kharediNondIDs[i]));
-                        if (fetchmayatData != null)
-                        {
-                            fetchMrutyuDetails.Add(fetchmayatData);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                FetchMayatDTLForNIC fetchData = new FetchMayatDTLForNIC();
-                fetchData.mayat_id = 0;
-                fetchData.usermasteruserid = 0;
-                fetchData.applicationDTLapplicationid = "";
-                fetchData.mutation_cts_no_id = 0;
-                fetchData.mobileno = "";
-                fetchData.mobilenoverified = "";
-                fetchData.emailid = "";
-                fetchData.emailidverified = "";
-                fetchData.prefixcode_marathi = "";
-                fetchData.prefix_in_marathi = "";
-                fetchData.fname_in_marathi = "";
-                fetchData.mname_in_marathi = "";
-                fetchData.lname_in_marathi = "";
-                fetchData.prefixcode_eng = "";
-                fetchData.prefix_in_eng = "";
-                fetchData.fname_in_eng = "";
-                fetchData.mname_in_eng = "";
-                fetchData.lname_in_eng = "";
-                fetchData.alias_name = "";
-                fetchData.address_type = "";
-                fetchData.address = "";
-                fetchData.state = "";
-                fetchData.district = ""; ;
-                fetchData.taluka = "";
-                fetchData.city = "";
-                fetchData.flatno_plotno = "";
-                fetchData.societyname = "";
-                fetchData.mainstreet = "";
-                fetchData.landmark = "";
-                fetchData.locality = "";
-                fetchData.pincode = "";
-                fetchData.post_office_name = "";
-                fetchData.city_servey_no = "";
-                fetchData.lr_property_id = "";
-                fetchData.milkat = "";
-                fetchData.namud = "";
-                fetchData.sub_property_no = "";
-                fetchData.mutation_srno = "";
-                fetchData.owner_number = "";
-                fetchData.cts_number = "";
-                fetchData.actual_area = "";
-                fetchData.mrutyu_date = "";
-                fetchData.certificate_authority_code = "";
-                fetchData.certificate_authority_name = "";
-                fetchData.mrutyucert_no = "";
-                fetchData.mrutyu_certificate_date = "";
-                fetchData.mrutyu_certificate__name = "";
-                fetchData.mrutyu_certificate_path = "";
-                fetchData.is_name_same = "";
-                fetchData.reason = "";
-                fetchData.namecorrect_docname = "";
-                fetchData.namecorrect_docpath = "";
-                fetchData.address_proof_document_name = "";
-                fetchData.address_proof_document_path = "";
-                fetchData.signed_file_name = "";
-                fetchData.signed_file_path = "";
-                fetchData.isdeleted = false;
-                fetchData.deleteddate = "";
-                fetchData.createddatetime = "";
-                //Below are new fields -> Added on 31 Dec 25
-                fetchData.probet_file_name = "";
-                fetchData.probet_file_path = "";
-                fetchData.isprobet = false;
-                fetchMrutyuDetails.Add(fetchData);
-            }
-            //if (!string.IsNullOrEmpty(applicationDTL.varasIDS))
-            //{
-            //    string[] kharediNondIDs = applicationDTL.varasIDS.Split(",");
-            //    if (kharediNondIDs.Length > 0)
-            //    {
-            //        for (int i = 0; i < kharediNondIDs.Length; i++)
-            //        {
-            //            FetchVarasNondDetailsData fetchdata = new FetchVarasNondDetailsData();
-            //            fetchdata = FetchVarasData(Convert.ToInt32(kharediNondIDs[i]));
-            //            if (fetchdata != null)
-            //            {
-            //                fetchvarasNondList.Add(fetchdata);
-            //            }
-            //        }
-            //    }
-            //}
-            //}
-            application.mayatdtl = fetchMrutyuDetails;
-            //application.varasNondDetailsData = fetchvarasNondList;
-            //string mutationgivertype = "";
-            //string mutationtakertype = "";
-            //string varasnond = "";
-            //if (applicationDTL.mutation_type_code == "01")
-            //{
-            //    mutationgivertype = "मयताची माहिती";
-            //    mutationtakertype = "मृत्यू दाखला माहिती";
-            //    varasnond = "वारस नोंद माहिती";
-            //}
-            //else if (applicationDTL.mutation_type_code == "03")
-            //{
-            //    mutationgivertype = "खरेदीनोंद देणार";
-            //    mutationtakertype = "खरेदीनोंद घेणार";
-            //}
-            ////Bakshish Patra
-            //else if (applicationDTL.mutation_type_code == "04")
-            //{
-            //    mutationgivertype = "बक्षीसपत्र देणार";
-            //    mutationtakertype = "बक्षीसपत्र घेणार";
-            //}
-            ////Mrutyu Nond
-            //else if (applicationDTL.mutation_type_code == "05")
-            //{
-            //    mutationgivertype = "मृत्यूपत्र/इच्छापत्र देणार";
-            //    mutationtakertype = "मृत्यूपत्र/इच्छापत्र घेणार";
-            //}
-            ////Gahankhat Nond
-            //else if (applicationDTL.mutation_type_code == "06")
-            //{
-            //    mutationgivertype = "गाहाणखत/तारण/बोजा देणार";
-            //    mutationtakertype = "गाहाणखत/तारण/बोजा घेणार";
-
-            //}
-            ////HakkaSod Nond
-            //else if (applicationDTL.mutation_type_code == "09")
-            //{
-            //    mutationgivertype = "हक्कसोड पत्र/रिलीज डिड देणार";
-            //    mutationtakertype = "हक्कसोड पत्र/रिलीज डिड घेणार";
-            //}
-
-
-            List<FetcMutationGiverTakerDTL> fetcMutationGiverTakerDTLs = new List<FetcMutationGiverTakerDTL>();
-            if (!string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
-            {
-                string[] mutationGiverTakerIDS = applicationDTL.mutationgiverIDs.Split(",");
-                if (mutationGiverTakerIDS.Length > 0)
-                {
-                    for (int i = 0; i < mutationGiverTakerIDS.Length; i++)
-                    {
-                        FetcMutationGiverTakerDTL fetchdata = new FetcMutationGiverTakerDTL();
-                        fetchdata = FetchMutationDTL(Convert.ToInt32(mutationGiverTakerIDS[i]), applicationid);
-                        if (fetchdata != null)
-                        {
-                            fetcMutationGiverTakerDTLs.Add(fetchdata);
-                        }
-                    }
-                }
-            }
-            if (!string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
-            {
-                string[] mutationGiverTakerIDS = applicationDTL.mutationtakerIDs.Split(",");
-                if (mutationGiverTakerIDS.Length > 0)
-                {
-                    for (int i = 0; i < mutationGiverTakerIDS.Length; i++)
-                    {
-                        FetcMutationGiverTakerDTL fetchdata = new FetcMutationGiverTakerDTL();
-                        fetchdata = FetchMutationDTL(Convert.ToInt32(mutationGiverTakerIDS[i]), applicationid);
-                        if (fetchdata != null)
-                        {
-                            fetcMutationGiverTakerDTLs.Add(fetchdata);
-                        }
-                    }
-                }
-            }
-            else if (!string.IsNullOrEmpty(applicationDTL.varasIDS))
-            {
-                string[] varasids = applicationDTL.varasIDS.Split(",");
-                if (varasids.Length > 0)
-                {
-                    for (int i = 0; i < varasids.Length; i++)
-                    {
-                        FetcMutationGiverTakerDTL fetchdata = new FetcMutationGiverTakerDTL();
-                        fetchdata = FetchMutationDTL(Convert.ToInt32(varasids[i]), applicationid);
-                        if (fetchdata != null)
-                        {
-                            fetcMutationGiverTakerDTLs.Add(fetchdata);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                FetcMutationGiverTakerDTL fetchData = new FetcMutationGiverTakerDTL();
-                fetchData.mutation_givertaker_id = 0;
-                fetchData.usermasteruserid = 0;
-                fetchData.applicationdtlapplicationid = "";
-                fetchData.user_type_code = 0;
-                fetchData.user_type = "";
-                fetchData.prop_typepropertytypeid = "";
-                fetchData.istaker = 0;
-                fetchData.mobileno = "";
-                fetchData.mobilenoverified = "";
-                fetchData.emailid = "";
-                fetchData.emailidverified = "";
-                fetchData.prefixcode_marathi = "";
-                fetchData.prefix_in_marathi = "";
-                fetchData.fname_in_marathi = "";
-                fetchData.mname_in_marathi = "";
-                fetchData.lname_in_marathi = "";
-                fetchData.prefixcode_eng = "";
-                fetchData.prefix_in_eng = "";
-                fetchData.fname_in_eng = "";
-                fetchData.mname_in_eng = "";
-                fetchData.lname_in_eng = "";
-                fetchData.alias_name = "";
-                fetchData.company_name_in_marathi = "";
-                fetchData.company_name_in_eng = "";
-                fetchData.gender_code = "";
-                fetchData.gender_description = "";
-                fetchData.holder_type = "";
-                fetchData.dob = "";
-                fetchData.mother_name_in_marathi = "";
-                fetchData.mother_name_in_eng = "";
-                fetchData.username = "";
-                fetchData.city_servey_no = "";
-                fetchData.lr_property_id = "";
-                fetchData.sub_property_no = "";
-                fetchData.sellerid = "";
-                fetchData.buyerid = "";
-                fetchData.mutation_srno = "";
-                fetchData.owner_number = "";
-                fetchData.cts_number = "";
-                fetchData.milkat = "";
-                fetchData.namud = "";
-                fetchData.isfullareagiven = "";
-                fetchData.actual_area = "";
-                fetchData.available_area = "";
-                fetchData.mutation_area = "";
-                fetchData.address_type = "";
-                fetchData.address = "";
-                fetchData.state = "";
-                fetchData.district = "";
-                fetchData.taluka = "";
-                fetchData.city = "";
-                fetchData.flatno_plotno = "";
-                fetchData.societyname = "";
-                fetchData.mainstreet = "";
-                fetchData.landmark = "";
-                fetchData.locality = "";
-                fetchData.pincode = "";
-                fetchData.post_office_name = "";
-                fetchData.address_proof_document_name = "";
-                fetchData.address_proof_document_path = "";
-                fetchData.has_property = "";
-                fetchData.aapak = "";
-                fetchData.land_buy_area = "";
-                fetchData.account_type_code = 0;
-                fetchData.account_type_description = "";
-                fetchData.apk_code = 0;
-                fetchData.apk_description = "";
-                fetchData.khata_type_code = "";
-                fetchData.khata_type_name = "";
-                fetchData.owner_status_code = "";
-                fetchData.owner_status_description = "";
-                fetchData.khatano = "";
-                fetchData.ulpin = "";
-                fetchData.district_code = "";
-                fetchData.district_name_in_marathi = "";
-                fetchData.district_name_in_eng = "";
-                fetchData.village_code = "";
-                fetchData.village_name = "";
-                fetchData.ofc_code = "";
-                fetchData.ofc_name = "";
-                fetchData.relation_code = 0;
-                fetchData.relation_name = "";
-                fetchData.varas_relation_code = 0;
-                fetchData.varas_relation_name = "";
-                fetchData.institute_code = 0;
-                fetchData.institute_description = "";
-                fetchData.bank_name_in_marathi = "";
-                fetchData.bank_name_in_english = "";
-                fetchData.ifsc = "";
-                fetchData.boja_value = "";
-                fetchData.boja_date = "";
-                fetchData.boja_period = "";
-                fetchData.benefit_amt = "";
-                fetchData.isdeleted = false;
-                fetchData.deleteddate = "";
-                fetchData.createddatetime = "";
-                fetchData.signed_file_name = "";
-                fetchData.signed_file_path = "";
-                fetchData.profile_pic_file_name = "";
-                fetchData.profile_pic_file_path = "";
-                fetchData.mutation_cts_no_id = 0;
-                //Below are new fields -> Added on 31 Dec 25
-                fetchData.owner_village_code = "";
-                fetchData.entry_bracketed = "";
-                fetchData.entry_date = "";
-                fetchData.owner_bracketed = "";
-                fetchData.owner_name = "";
-                fetcMutationGiverTakerDTLs.Add(fetchData);
-            }
-
-            //Fetch Bhadepatta Info Data
-            List<FetchBhadepattaInfoDTLForNIC> fetchBhadepattaInfoList = new List<FetchBhadepattaInfoDTLForNIC>();
-            if (applicationDTL.mutation_type_code == "10")
-            {
-                FetchBhadepattaInfoDTLForNIC fetchBhadepattaInfo = new FetchBhadepattaInfoDTLForNIC();
-                fetchBhadepattaInfo = FetchBhadepattaInfoDTL(applicationid);
-                fetchBhadepattaInfoList.Add(fetchBhadepattaInfo);
-            }
-            else
-            {
-                FetchBhadepattaInfoDTLForNIC fetchBhadepattaInfo = new FetchBhadepattaInfoDTLForNIC();
-                fetchBhadepattaInfo.Info_id = 0;
-                fetchBhadepattaInfo.userid = 0;
-                fetchBhadepattaInfo.applicationid = "";
-                fetchBhadepattaInfo.bhadepattaTenureYear = "";
-                fetchBhadepattaInfo.bhadepattaTenureMonth = "";
-                fetchBhadepattaInfo.bhadepattaAmount = "";
-                fetchBhadepattaInfo.leaseperiod = true;
-                fetchBhadepattaInfo.bhadepattaToDate = "";
-                fetchBhadepattaInfo.bhadepattaFromDate = "";
-                fetchBhadepattaInfo.createdDateTime = "";
-                fetchBhadepattaInfo.deletedDateTime = "";
-                fetchBhadepattaInfo.isDeleted = false;
-                fetchBhadepattaInfoList.Add(fetchBhadepattaInfo);
-            }
-
-            //Fetch Hibanama Info Data
-            List<FetchHibanamaWitnessDataForNIC> fetchHibanamaWitnessInfoDataList = new List<FetchHibanamaWitnessDataForNIC>();
-            if (!string.IsNullOrEmpty(applicationDTL.witnessids))
-            {
-                string[] witnessIds = applicationDTL.witnessids.Split(",");
-                if (witnessIds.Length > 0)
-                {
-                    for (int i = 0; i < witnessIds.Length; i++)
-                    {
-                        FetchHibanamaWitnessDataForNIC fetchData = new FetchHibanamaWitnessDataForNIC();
-                        fetchData = FetchHibanamaWitnessData(Convert.ToInt32(witnessIds[i]));
-                        if (fetchData != null)
-                        {
-                            fetchHibanamaWitnessInfoDataList.Add(fetchData);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                FetchHibanamaWitnessDataForNIC fetchData = new FetchHibanamaWitnessDataForNIC();
-                fetchData.witness_info_id = 0;
-                fetchData.usermasteruserid = 0;
-                fetchData.applicationdtlapplicationid = "";
-                fetchData.permission_no = "";
-                fetchData.permission_date = "";
-                fetchData.prefixcode_marathi = "";
-                fetchData.prefix_in_marathi = "";
-                fetchData.fname_in_marathi = "";
-                fetchData.mname_in_marathi = "";
-                fetchData.lname_in_marathi = "";
-                fetchData.prefixcode_eng = "";
-                fetchData.prefix_in_eng = "";
-                fetchData.fname_in_eng = "";
-                fetchData.mname_in_eng = "";
-                fetchData.lname_in_eng = "";
-                fetchData.alias_name = "";
-                fetchData.address_type = "";
-                fetchData.address = "";
-                fetchData.state = "";
-                fetchData.district = "";
-                fetchData.taluka = "";
-                fetchData.city = "";
-                fetchData.flatno_plotno = "";
-                fetchData.societyname = "";
-                fetchData.mainstreet = "";
-                fetchData.landmark = "";
-                fetchData.locality = "";
-                fetchData.pincode = "";
-                fetchData.post_office_name = "";
-                fetchData.address_proof_document_name = "";
-                fetchData.address_proof_document_path = "";
-                fetchData.mobileno = "";
-                fetchData.mobilenoverified = "";
-                fetchData.emailid = "";
-                fetchData.emailidverified = "";
-                fetchData.createddatetime = "";
-                fetchData.isdeleted = false;
-                fetchData.deleteddate = "";
-                fetchHibanamaWitnessInfoDataList.Add(fetchData);
-            }
-
-            //Fetch Error Correction data
-            List<FetchErrorCorrectionDataForNIC> fetchErrorCorrectionDataList = new List<FetchErrorCorrectionDataForNIC>();
-            if (!string.IsNullOrEmpty(applicationDTL.errorcorrectionids))
-            {
-                string[] errorcorrectionIDS = applicationDTL.errorcorrectionids.Split(",");
-                if (errorcorrectionIDS.Length > 0)
-                {
-                    for (int i = 0; i < errorcorrectionIDS.Length; i++)
-                    {
-                        FetchErrorCorrectionDataForNIC fetchErrorCorrectionData = new FetchErrorCorrectionDataForNIC();
-                        fetchErrorCorrectionData = FetchErrorCorrectionData(Convert.ToInt32(errorcorrectionIDS[i]));
-                        if (fetchErrorCorrectionData != null)
-                        {
-                            fetchErrorCorrectionDataList.Add(fetchErrorCorrectionData);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                FetchErrorCorrectionDataForNIC fetchData = new FetchErrorCorrectionDataForNIC();
-                fetchData.error_correction_id = 0;
-                fetchData.usermasteruserid = 0;
-                fetchData.applicationdtlapplicationid = "";
-                fetchData.village_code = "";
-                fetchData.sub_property_no = "";
-                fetchData.city_servey_no = "";
-                fetchData.lr_property_id = "";
-                fetchData.milkat = "";
-                fetchData.namud = "";
-                //fetchData.var_village_code = "";
-                //fetchData.var_cts_number =
-                //fetchData.var_cts_puid =
-                //fetchData.var_mutation_srno =
-                //fetchData.var_entry_date =
-                //fetchData.var_mutation_number =
-                //fetchData.var_mutation_date =
-                //fetchData.var_sro_office_name_marathi =
-                //fetchData.var_sro_office_name_english =
-                //fetchData.var_document_number =
-                //fetchData.var_document_year =
-                //fetchData.var_document_date =
-                //fetchData.var_entry_details =
-                //fetchData.var_owner_details =
-                fetchData.reason = "";
-                fetchData.address_type = "";
-                fetchData.emailid = "";
-                fetchData.mobileno = "";
-                fetchData.mobilenoverified = "";
-                fetchData.address = "";
-                fetchData.state = "";
-                fetchData.district = "";
-                fetchData.taluka = "";
-                fetchData.city = "";
-                fetchData.flatno_plotno = "";
-                fetchData.societyname = "";
-                fetchData.mainstreet = "";
-                fetchData.landmark = "";
-                fetchData.locality = "";
-                fetchData.pincode = "";
-                fetchData.post_office_name = "";
-                fetchData.address_proof_document_name = "";
-                fetchData.address_proof_document_path = "";
-                fetchData.createddatetime = "";
-                fetchData.isdeleted = false;
-                fetchData.deleteddate = "";
-                fetchErrorCorrectionDataList.Add(fetchData);
-            }
-
-            // Fetch Navatbadal Data
-            List<FetchNavatBadalDataForNIC> fetchNavatBadalDataList = new List<FetchNavatBadalDataForNIC>();
-            if (!string.IsNullOrEmpty(applicationDTL.namechangeids))
-            {
-                string[] namechangeIDS = applicationDTL.namechangeids.Split(",");
-                if (namechangeIDS.Length > 0)
-                {
-                    for (int i = 0; i < namechangeIDS.Length; i++)
-                    {
-                        FetchNavatBadalDataForNIC fetchNavatBadalData = new FetchNavatBadalDataForNIC();
-                        fetchNavatBadalData = FetchNavatBadalData(Convert.ToInt32(namechangeIDS[i]));
-                        if (fetchNavatBadalData != null)
-                        {
-                            fetchNavatBadalDataList.Add(fetchNavatBadalData);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                FetchNavatBadalDataForNIC fetchData = new FetchNavatBadalDataForNIC();
-                fetchData.name_change_id = 0;
-                fetchData.usermasteruserid = 0;
-                fetchData.applicationdtlapplicationid = "";
-                fetchData.village_code = "";
-                fetchData.subpropno = "";
-                fetchData.nabhu = "";
-                fetchData.lrpropertyuid = "";
-                fetchData.milkat = "";
-                fetchData.namud = "";
-                fetchData.name_change_by_code = 0;
-                fetchData.name_change_by_description = "";
-                fetchData.name_change_no = "";
-                fetchData.name_change_date = "";
-                // selectedMutation -> data from EPCIS
-                fetchData.selected_village_code = "";
-                fetchData.selected_cts_number = "";
-                fetchData.selected_mutation_srno = "";
-                fetchData.selected_entry_date = "";
-                fetchData.selected_entry_bracketed = "";
-                fetchData.selected_owner_number = "";
-                fetchData.selected_owner_name = "";
-                fetchData.selected_first_name = "";
-                fetchData.selected_middle_name = "";
-                fetchData.selected_last_name = "";
-                fetchData.selected_nick_name = "";
-                fetchData.selected_owner_bracketed = "";
-                fetchData.selected_area_bracketed = "";
-                fetchData.selected_email_id = "";
-                fetchData.selected_owner_cell_number = "";
-                fetchData.selected_pincode = "";
-                fetchData.selected_owner_type = "";
-                fetchData.selected_apk_code = "";
-                fetchData.selected_apk_name = "";
-                fetchData.selected_flat_or_house_number = "";
-                fetchData.selected_building_number = "";
-                fetchData.selected_road = "";
-                fetchData.selected_city_or_village = "";
-                fetchData.selected_taluka_name = "";
-                fetchData.selected_district_name = "";
-                fetchData.selected_state_name = "";
-                fetchData.selected_gender_code = "";
-                fetchData.selected_date_of_birth = "";
-                fetchData.selected_owner_area = "";
-                fetchData.selected_owner_area_bracketed = "";
-                // Updated Details
-                fetchData.updated_usertype = 0;
-                fetchData.updated_usertypelabel = "";
-                fetchData.updated_prefixcode_marathi = "";
-                fetchData.updated_prefix_in_marathi = "";
-                fetchData.updated_fname_in_marathi = "";
-                fetchData.updated_mname_in_marathi = "";
-                fetchData.updated_lname_in_marathi = "";
-                fetchData.updated_prefixcode_eng = "";
-                fetchData.updated_prefix_in_eng = "";
-                fetchData.updated_fname_in_eng = "";
-                fetchData.updated_mname_in_eng = "";
-                fetchData.updated_lname_in_eng = "";
-                fetchData.company_name_in_marathi = "";
-                fetchData.company_name_in_eng = "";
-                // Address Fields
-                fetchData.address_type = "";
-                fetchData.emailid = "";
-                fetchData.mobileno = "";
-                fetchData.mobilenoverified = "";
-                fetchData.address = "";
-                fetchData.state = "";
-                fetchData.district = "";
-                fetchData.taluka = "";
-                fetchData.city = "";
-                fetchData.flatno_plotno = "";
-                fetchData.societyname = "";
-                fetchData.mainstreet = "";
-                fetchData.landmark = "";
-                fetchData.locality = "";
-                fetchData.pincode = "";
-                fetchData.postofficename = "";
-                fetchData.address_proof_document_name = "";
-                fetchData.address_proof_document_path = "";
-                fetchData.createddatetime = "";
-                fetchData.isdeleted = false;
-                fetchData.deleteddate = "";
-                fetchNavatBadalDataList.Add(fetchData);
-            }
-
-            //            //Mutation Giver 
-            //            List<dynamic> giver = mutationgiverData(applicationDTL);
-            ////Mutation Taker
-            //List<dynamic> taker = mutationtakerData(applicationDTL);
-
-            //List<MutationList> mutation = new List<MutationList>();
-            //if (applicationDTL.mutation_type_code == "01")
-            //{
-            //    mutation.Add(new MutationList { type = mutationgivertype, value = fetchmayatinfoList });
-            //    mutation.Add(new MutationList { type = mutationtakertype, value = fetchMrutyuDetails });
-            //    mutation.Add(new MutationList { type = varasnond, value = fetchvarasNondList });
-            //}
-            //else
-            //{
-            //mutation.Add(new MutationList { type = mutationgivertype, value = giver });
-            //mutation.Add(new MutationList { type = mutationtakertype, value = taker });
-            //}
-
-            application.mutationgivertakerdtls = fetcMutationGiverTakerDTLs;
-            application.bhadepattaInfoDtl = fetchBhadepattaInfoList;
-            application.errorcorrectiondtls = fetchErrorCorrectionDataList;
-            application.name_change_dtl = fetchNavatBadalDataList;
-            application.witness_info = fetchHibanamaWitnessInfoDataList;
-            //Document Data
-
-            var nabhuNoList = _context.mutationCTSNoDTLs.Include(app => app.applicationDTL).Where(app => app.applicationDTL!.applicationid == applicationid).Select(a => a.selected_city_servey_no).ToList();
-            //string nabh  = String.Join(", ", nabhuNoList);
-            //List<FetchUploadedDocumentsForNIC> document = new List<FetchUploadedDocumentsForNIC>();
-            //foreach (string? nabhu in nabhuNoList)
-            //{
-            //    var data = uploadDocuments(nabhu!, applicationid);
-            //    if (data != null)
-            //    {
-            //        document.Add(data);
-            //    }
-            //}
-            //application.uploaded_documents_dtl = document;
-
-            List<FetchUploadedDocumentDataForNIC> fetchUploadedDocumentsList = new List<FetchUploadedDocumentDataForNIC>();
-            if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.uploadedDocIDs))
-            {
-                string[] uploadedDocIDs = applicationDTL.uploadedDocIDs.Split(",");
-
-                if (uploadedDocIDs.Length > 0)
-                {
-                    for (int i = 0; i < uploadedDocIDs.Length; i++)
-                    {
-                        FetchUploadedDocumentDataForNIC fetchUploadedDocumentsData = new FetchUploadedDocumentDataForNIC();
-                        fetchUploadedDocumentsData = FetchUploadedDocumentDTLs(Convert.ToInt32(uploadedDocIDs[i]));
-                        if (fetchUploadedDocumentsData != null)
-                        {
-                            fetchUploadedDocumentsList.Add(fetchUploadedDocumentsData);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                FetchUploadedDocumentDataForNIC fetchData = new FetchUploadedDocumentDataForNIC();
-                fetchData.uploaded_doc_id = 0;
-                fetchData.usermasteruserid = 0;
-                fetchData.applicationdtlapplicationid = "";
-                fetchData.document_type_code = "";
-                fetchData.document_type = "";
-                fetchData.city_servey_no = "";
-                fetchData.document_name = "";
-                fetchData.document_path = "";
-                fetchData.createddatetime = "";
-                fetchData.isdeleted = false;
-                fetchData.deleteddate = "";
-                fetchUploadedDocumentsList.Add(fetchData);
-            }
-            application.uploaded_documents_dtl = fetchUploadedDocumentsList;
-            return application;
-        }
 
         //public List<dynamic> mutationgiverData(ApplicationDTL applicationDTL)
         //{
@@ -3538,6 +3630,81 @@ namespace PDEWebAPIS.Services
                     dbContextTransaction.Dispose();
                     throw new HandleException(ex.Message.ToString());
                 }
+            }
+        }
+
+        public FetchAttachmentOrderTBLInfoForNIC FetchAttachmentOrderData(int attachmentorderid)
+        {
+            try
+            {
+                AttachmentOrderInfo attachmentOrderInfo = new AttachmentOrderInfo();
+                attachmentOrderInfo = _context.attachmentOrderInfos.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.attachmentorderid == attachmentorderid && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchAttachmentOrderTBLInfoForNIC fetchData = new FetchAttachmentOrderTBLInfoForNIC();
+                fetchData.attachmentorderid = attachmentOrderInfo.attachmentorderid;
+                fetchData.applicationdtlapplicationid = attachmentOrderInfo.applicationDTL!.applicationid;
+                fetchData.usermasteruserid = attachmentOrderInfo.userMaster!.userid;
+                fetchData.nabhu_no = commonFunctions.ReplaceNA(attachmentOrderInfo.nabhu_no!);
+                fetchData.mutation_srno = commonFunctions.ReplaceNA(attachmentOrderInfo.mutation_srno!);
+                fetchData.owner_number = commonFunctions.ReplaceNA(attachmentOrderInfo.owner_number!);
+                fetchData.owner_name = commonFunctions.ReplaceNA(attachmentOrderInfo.owner_name!);
+                fetchData.area = commonFunctions.ReplaceNA(attachmentOrderInfo.area!);
+                fetchData.agencies_issuing_attachment_orders = commonFunctions.ReplaceNA(attachmentOrderInfo.agencies_issuing_attachment_orders!);
+                fetchData.name_of_the_agency_issuing_the_attachment_order = commonFunctions.ReplaceNA(attachmentOrderInfo.name_of_the_agency_issuing_the_attachment_order!);
+                fetchData.address_of_the_agency_issuing_the_attachment_order = commonFunctions.ReplaceNA(attachmentOrderInfo.address_of_the_agency_issuing_the_attachment_order!);
+                fetchData.attachment_order_number = commonFunctions.ReplaceNA(attachmentOrderInfo.attachment_order_number!);
+                fetchData.date_of_the_attachment_order = commonFunctions.ReplaceNA(attachmentOrderInfo.date_of_the_attachment_order!);
+                fetchData.is_the_attachment_order_issued_by_a_credit_society_or_a_bank = commonFunctions.ReplaceNA(attachmentOrderInfo.is_the_attachment_order_issued_by_a_credit_society_or_a_bank!);
+                fetchData.recovery_cert_under_section_101_issued_by_the_cooperative_officer = commonFunctions.ReplaceNA(attachmentOrderInfo.recovery_cert_under_section_101_issued_by_the_cooperative_officer!);
+                fetchData.recovery_cert_issued_by_the_cooperative_officer_in_91 = commonFunctions.ReplaceNA(attachmentOrderInfo.recovery_cert_issued_by_the_cooperative_officer_in_91!);
+                fetchData.recovery_cert_for_105_issued_by_the_liquidator = commonFunctions.ReplaceNA(attachmentOrderInfo.recovery_cert_for_105_issued_by_the_liquidator!);
+                fetchData.orbiter_order_no = commonFunctions.ReplaceNA(attachmentOrderInfo.orbiter_order_no!);
+                fetchData.orbiter_order_date = commonFunctions.ReplaceNA(attachmentOrderInfo.orbiter_order_date!);
+                fetchData.by_order_recording_entries_that_were_missed_during_computerization = commonFunctions.ReplaceNA(attachmentOrderInfo.by_order_recording_entries_that_were_missed_during_computerization!);
+                TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+                DateTime indianTime = TimeZoneInfo.ConvertTimeFromUtc(Convert.ToDateTime(attachmentOrderInfo.createddatetime.ToString()), INDIAN_ZONE);
+                fetchData.createddatetime = indianTime.ToString("yyyy-MM-dd");
+                fetchData.isdeleted = attachmentOrderInfo.isDeleted;
+                fetchData.deleteddate = attachmentOrderInfo.deleteddate.ToString("yyyy-MM-dd");
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public FetchDeclarationEntryInfoForNIC FetchDeclarationEntryInfoData(int declarationid)
+        {
+            try
+            {
+                DeclarationEntryInfo declarationEntryInfo = new DeclarationEntryInfo();
+                declarationEntryInfo = _context.declarationEntryInfos.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.declarationid == declarationid && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchDeclarationEntryInfoForNIC fetchData = new FetchDeclarationEntryInfoForNIC();
+                fetchData.declarationid = declarationEntryInfo.declarationid;
+                fetchData.applicationdtlapplicationid = declarationEntryInfo.applicationDTL!.applicationid;
+                fetchData.usermasteruserid = declarationEntryInfo.userMaster!.userid;
+                fetchData.type_of_authority_approving_the_construction_plan_code = declarationEntryInfo.type_of_authority_approving_the_construction_plan_code;
+                fetchData.type_of_authority_approving_the_construction_plan = commonFunctions.ReplaceNA(declarationEntryInfo.type_of_authority_approving_the_construction_plan!);
+                fetchData.company_name = commonFunctions.ReplaceNA(declarationEntryInfo.company_name!);
+                fetchData.map_approval_order_no = commonFunctions.ReplaceNA(declarationEntryInfo.map_approval_order_no!);
+                fetchData.map_approval_order_date = commonFunctions.ReplaceNA(declarationEntryInfo.map_approval_order_date!);
+                fetchData.construction_start_cert_no = commonFunctions.ReplaceNA(declarationEntryInfo.construction_start_cert_no!);
+                fetchData.construction_start_cert_date = commonFunctions.ReplaceNA(declarationEntryInfo.construction_start_cert_date!);
+                fetchData.occupancy_certificate_file_name = commonFunctions.ReplaceNA(declarationEntryInfo.occupancy_certificate_file_name!);
+                fetchData.occupancy_certificate_file_path = commonFunctions.ReplaceNA(declarationEntryInfo.occupancy_certificate_file_path!);
+                fetchData.occupancy_certificate_date = commonFunctions.ReplaceNA(declarationEntryInfo.occupancy_certificate_date!);
+                TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+                DateTime indianTime = TimeZoneInfo.ConvertTimeFromUtc(Convert.ToDateTime(declarationEntryInfo.createddatetime.ToString()), INDIAN_ZONE);
+                fetchData.createddatetime = indianTime.ToString("yyyy-MM-dd");
+                fetchData.isdeleted = declarationEntryInfo.isDeleted;
+                fetchData.deleteddate = declarationEntryInfo.deleteddate.ToString("yyyy-MM-dd");
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
             }
         }
 

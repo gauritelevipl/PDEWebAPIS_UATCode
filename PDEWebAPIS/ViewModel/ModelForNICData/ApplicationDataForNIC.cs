@@ -19,8 +19,10 @@ namespace PDEWebAPIS.ViewModel.ModelForNICData
         public List<FetcMutationGiverTakerDTL>? mutationgivertakerdtls { get; set; }
         public List<FetchBhadepattaInfoDTLForNIC>? bhadepattaInfoDtl { get; set; }
         public List<FetchErrorCorrectionDataForNIC>? errorcorrectiondtls { get; set; }
-        public List<FetchNavatBadalDataForNIC> ? name_change_dtl {  get; set; }
-        public List<FetchHibanamaWitnessDataForNIC>? witness_info {  get; set; }
+        public List<FetchNavatBadalDataForNIC>? name_change_dtl { get; set; }
+        public List<FetchHibanamaWitnessDataForNIC>? witness_info { get; set; }
+        public List<FetchAttachmentOrderTBLInfoForNIC>? attachment_order_info { get; set; }
+        public List<FetchDeclarationEntryInfoForNIC>? declaration_entry_info {  get; set; }
         //public dynamic? mutationgivertakerdtls { get; set; }
         //public List<FetchUploadedDocumentsForNIC>? uploaded_documents_dtl { get; set; }
         public List<FetchUploadedDocumentDataForNIC>? uploaded_documents_dtl { get; set; }
@@ -870,7 +872,8 @@ namespace PDEWebAPIS.ViewModel.ModelForNICData
         public string? deleteddate { set; get; }
     }
 
-    public class FetchNavatBadalDataForNIC {
+    public class FetchNavatBadalDataForNIC
+    {
         public int name_change_id { get; set; }
         public int usermasteruserid { get; set; }
         public string? applicationdtlapplicationid { get; set; }
@@ -993,6 +996,53 @@ namespace PDEWebAPIS.ViewModel.ModelForNICData
         public string? mobilenoverified { get; set; }
         public string? emailid { set; get; }
         public string? emailidverified { set; get; }
+        public string? createddatetime { get; set; }
+        public bool isdeleted { set; get; }
+        public string? deleteddate { set; get; }
+    }
+
+    public class FetchAttachmentOrderTBLInfoForNIC
+    {
+        public int attachmentorderid { get; set; }
+        public int usermasteruserid { get; set; }
+        public string? applicationdtlapplicationid { get; set; }
+        public string? nabhu_no { get; set; }
+        public string? mutation_srno { get; set; }
+        public string? owner_number { get; set; }
+        public string? owner_name { get; set; }
+        public string? area { get; set; }
+        public string? agencies_issuing_attachment_orders { get; set; }
+        public string? name_of_the_agency_issuing_the_attachment_order { get; set; }
+        public string? address_of_the_agency_issuing_the_attachment_order { get; set; }
+        public string? attachment_order_number { get; set; }
+        public string? date_of_the_attachment_order { get; set; }
+        public string? is_the_attachment_order_issued_by_a_credit_society_or_a_bank { get; set; }
+        public string? recovery_cert_under_section_101_issued_by_the_cooperative_officer { get; set; }
+        public string? recovery_cert_issued_by_the_cooperative_officer_in_91 { get; set; }
+        public string? recovery_cert_for_105_issued_by_the_liquidator { get; set; }
+        public string? orbiter_order_no { get; set; }
+        public string? orbiter_order_date { get; set; }
+        public string? by_order_recording_entries_that_were_missed_during_computerization { get; set; }
+        public string? createddatetime { get; set; }
+        public bool isdeleted { set; get; }
+        public string? deleteddate { set; get; }
+    }
+
+    public class FetchDeclarationEntryInfoForNIC
+    {
+        public int declarationid { get; set; }
+        public int usermasteruserid { get; set; }
+        public string? applicationdtlapplicationid { get; set; }
+        public int type_of_authority_approving_the_construction_plan_code { get; set; }
+        public string? type_of_authority_approving_the_construction_plan { get; set; }
+        public string? company_name { get; set; }
+        public string? map_approval_order_no { get; set; }
+        public string? map_approval_order_date { get; set; }
+        public string? construction_start_cert_no { get; set; }
+        public string? construction_start_cert_date { get; set; }
+        public string? occupancy_certificate_file_name { get; set; }
+        public string? occupancy_certificate_file_path { get; set; }
+        public string? occupancy_certificate_date { get; set; }
         public string? createddatetime { get; set; }
         public bool isdeleted { set; get; }
         public string? deleteddate { set; get; }
