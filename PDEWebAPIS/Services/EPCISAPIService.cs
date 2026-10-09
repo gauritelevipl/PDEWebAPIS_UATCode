@@ -3755,6 +3755,10 @@ namespace PDEWebAPIS.Services
         {
             try
             {
+                DateTime startDate = Convert.ToDateTime("2025-04-04");
+                DateTime endDate = DateTime.Now;
+                DateTime fromDate = DateTime.SpecifyKind((DateTime)startDate!, DateTimeKind.Utc);
+                DateTime toDate = DateTime.SpecifyKind((DateTime)endDate!, DateTimeKind.Utc).Date.AddDays(1).AddTicks(-1);
                 string regionCode = inputData.region_code!;
                 string districtCode = inputData.district_code!;
                 string officeCode = inputData.office_code!;
@@ -3767,13 +3771,13 @@ namespace PDEWebAPIS.Services
                     //,{ 10, "generatedInwardNoCount" }
                 };
 
-                IQueryable<ApplicationDTL> query = context.applicationDTL.Where(a => a.status.Equals(10) && a.inwardno != "NA");
+                IQueryable<ApplicationDTL> query = context.applicationDTL.Where(s => s.createddatetime >= fromDate && s.createddatetime <= toDate);
 
                 // All regions
                 if (regionCode == "0" && districtCode == "0" && officeCode == "0")
                 {
                     var regionActualCounts = query
-                        .GroupBy(a => a.status == 10 ? 0 : a.status)
+                        .GroupBy(a => a.status >= 10 && a.status <= 15 ? 0 : a.status)
                         .Select(g => new
                         {
                             StatusCode = g.Key,
@@ -3833,7 +3837,7 @@ namespace PDEWebAPIS.Services
                 }
 
                 var actualCounts = query
-                    .GroupBy(a => a.status == 10 ? 0 : a.status)
+                    .GroupBy(a => a.status >= 10 && a.status <= 15 ? 0 : a.status)
                     .Select(g => new
                     {
                         StatusCode = g.Key,

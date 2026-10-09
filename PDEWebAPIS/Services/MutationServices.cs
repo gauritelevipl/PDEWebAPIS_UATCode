@@ -27831,7 +27831,7 @@ namespace PDEWebAPIS.Services
                             dbTable.attachment_order_number = inputData.orderNo;
                             dbTable.date_of_the_attachment_order = inputData.orderDate;
                             dbTable.is_the_attachment_order_issued_by_a_credit_society_or_a_bank = inputData.isRecoveryApplicable.ToUpper();
-                            dbTable.recovery_cert_under_section_101_issued_by_the_cooperative_officer = inputData.recovery101;
+                            dbTable.recovery_cert_under_section_101_issued_by_cooperative_officer = inputData.recovery101;
                             dbTable.recovery_cert_issued_by_the_cooperative_officer_in_91 = inputData.recovery91;
                             dbTable.recovery_cert_for_105_issued_by_the_liquidator = inputData.recovery105;
                             dbTable.orbiter_order_no = inputData.arbitratorOrder;
@@ -27894,7 +27894,7 @@ namespace PDEWebAPIS.Services
                 fetchData.orderNo = dbdata.attachment_order_number;
                 fetchData.orderDate = dbdata.date_of_the_attachment_order;
                 fetchData.isRecoveryApplicable = dbdata.is_the_attachment_order_issued_by_a_credit_society_or_a_bank;
-                fetchData.recovery101 = dbdata.recovery_cert_under_section_101_issued_by_the_cooperative_officer;
+                fetchData.recovery101 = dbdata.recovery_cert_under_section_101_issued_by_cooperative_officer;
                 fetchData.recovery91 = dbdata.recovery_cert_issued_by_the_cooperative_officer_in_91;
                 fetchData.recovery105 = dbdata.recovery_cert_for_105_issued_by_the_liquidator;
                 fetchData.arbitratorOrder = dbdata.orbiter_order_no;
@@ -28051,7 +28051,7 @@ namespace PDEWebAPIS.Services
                     AttachmentOrderInfo dbTable = new AttachmentOrderInfo();
                     dbTable.userMaster = userMaster;
                     dbTable.applicationDTL = applicationDTL;
-                    dbTable.by_order_recording_entries_that_were_missed_during_computerization = inputData.nondichaTapshil;
+                    dbTable.by_order_recording_entries_were_missed_during_computerization = inputData.nondichaTapshil;
                     dbTable.nabhu_no = "NA";
                     dbTable.mutation_srno = "NA";
                     dbTable.owner_number = "NA";
@@ -28103,7 +28103,7 @@ namespace PDEWebAPIS.Services
                 fetchData.attachmentorderid = dbdata.attachmentorderid;
                 fetchData.userid = dbdata.userMaster!.userid;
                 fetchData.applicationid = dbdata.applicationDTL!.applicationid;
-                fetchData.nondichaTapshil = dbdata.by_order_recording_entries_that_were_missed_during_computerization;
+                fetchData.nondichaTapshil = dbdata.by_order_recording_entries_were_missed_during_computerization;
                 return fetchData;
             }
             catch (Exception ex)
