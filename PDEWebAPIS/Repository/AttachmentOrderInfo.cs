@@ -25,12 +25,12 @@ namespace PDEWebAPIS.Repository
         public string? attachment_order_number {  get; set; }
         public string? date_of_the_attachment_order { get; set; }
         public string? is_the_attachment_order_issued_by_a_credit_society_or_a_bank {  get; set; }
-        public string? recovery_cert_under_section_101_issued_by_the_cooperative_officer {  get; set; }
+        public string? recovery_cert_under_section_101_issued_by_cooperative_officer {  get; set; }
         public string? recovery_cert_issued_by_the_cooperative_officer_in_91 { get; set; }
         public string? recovery_cert_for_105_issued_by_the_liquidator {  get; set; }
         public string? orbiter_order_no {  get; set; }
         public string? orbiter_order_date { get; set; }
-        public string? by_order_recording_entries_that_were_missed_during_computerization {  get; set; }
+        public string? by_order_recording_entries_were_missed_during_computerization {  get; set; }
         public DateTime createddatetime { get; set; }
         public bool isDeleted { set; get; }
         public DateOnly deleteddate { set; get; }

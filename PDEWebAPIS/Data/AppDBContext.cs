@@ -522,7 +522,7 @@ namespace PDEWebAPIS.Data
               .HasDefaultValue("NO");
 
             modelBuilder.Entity<AttachmentOrderInfo>()
-           .Property(b => b.recovery_cert_under_section_101_issued_by_the_cooperative_officer)
+           .Property(b => b.recovery_cert_under_section_101_issued_by_cooperative_officer)
            .HasDefaultValue("NA");
             modelBuilder.Entity<AttachmentOrderInfo>()
             .Property(b => b.recovery_cert_issued_by_the_cooperative_officer_in_91)
@@ -537,7 +537,7 @@ namespace PDEWebAPIS.Data
            .Property(b => b.orbiter_order_date)
            .HasDefaultValue("NA");
             modelBuilder.Entity<AttachmentOrderInfo>()
-         .Property(b => b.by_order_recording_entries_that_were_missed_during_computerization)
+         .Property(b => b.by_order_recording_entries_were_missed_during_computerization)
          .HasDefaultValue("NA");
             modelBuilder.Entity<AttachmentOrderInfo>()
              .Property(b => b.createddatetime)
