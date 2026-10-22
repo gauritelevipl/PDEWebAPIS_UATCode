@@ -55,5 +55,8 @@ namespace PDEWebAPIS.Repository
         //Below code added on 05 Oct 26
         public string? declarationentryids { get; set; }
         public string? attachmentorderids { get;set; }
+
+        // Below code added on 22 Oct 26
+        public string? approvedlayoutids {  set; get; }
     }
 }

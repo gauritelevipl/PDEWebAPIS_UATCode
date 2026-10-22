@@ -548,6 +548,16 @@ namespace PDEWebAPIS.Data
             modelBuilder.Entity<AttachmentOrderInfo>()
          .Property(b => b.deleteddate)
          .HasDefaultValueSql("1900-01-01");
+
+            modelBuilder.Entity<ApprovedLayoutInfo>()
+            .Property(b => b.createddatetime)
+           .HasDefaultValueSql("current_timestamp");
+            modelBuilder.Entity<ApprovedLayoutInfo>()
+          .Property(b => b.isdeleted)
+          .HasDefaultValue(false);
+            modelBuilder.Entity<ApprovedLayoutInfo>()
+         .Property(b => b.deleteddate)
+         .HasDefaultValueSql("1900-01-01");
         }
 
         public DbSet<PropertyTypeMaster> propertyTypes { get; set; }
@@ -596,6 +606,6 @@ namespace PDEWebAPIS.Data
         public DbSet<WitnessDTL> witnessDTLs { get; set; }
         public DbSet<DeclarationEntryInfo> declarationEntryInfos { get; set; }
         public DbSet<AttachmentOrderInfo> attachmentOrderInfos { get; set; }
-
+        public DbSet<ApprovedLayoutInfo> approvedLayoutInfos { get; set; }
     }
 }

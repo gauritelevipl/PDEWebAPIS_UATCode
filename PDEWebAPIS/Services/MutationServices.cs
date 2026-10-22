@@ -27913,7 +27913,6 @@ namespace PDEWebAPIS.Services
             {
                 try
                 {
-                    MethodForFileUpload methodForFileUpload = new MethodForFileUpload();
                     var entity = _context.attachmentOrderInfos.FirstOrDefault(s => s.attachmentorderid == deleteMutation.attachmentorderid! && s.isDeleted == false)!;
                     if (entity != null)
                     {
@@ -28109,6 +28108,125 @@ namespace PDEWebAPIS.Services
             catch (Exception ex)
             {
                 throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        // मंजूर लेआऊट
+        public string SaveApprovedLayoutInfoData(ApprovedLayoutInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationid!)!;
+                    //Assign Data to Table fields to insert new records
+                    ApprovedLayoutInfo dbTable = new ApprovedLayoutInfo();
+                    dbTable.userMaster = userMaster;
+                    dbTable.applicationDTL = applicationDTL;
+                    dbTable.competent_authority_approving_the_layout = inputData.layoutApprovingAuthority;
+                    dbTable.name_of_the_office = inputData.layoutOfficeName;
+                    dbTable.order_no = inputData.orderNo;
+                    dbTable.order_date = inputData.orderDate;
+                    dbTable.approved_layout_drawing_no = inputData.approvedLayoutNo;
+                    dbTable.approved_layout_drawing_date = inputData.approvedLayoutDate;
+                    dbTable.measurement_no = inputData.measurementRegNo;
+                    dbTable.measurement_date = inputData.measurementDate;
+                    dbTable.is_it_attached_to_the_approved_layout_case = inputData.isLayoutAttached!.ToUpper();
+                    _context.approvedLayoutInfos.Add(dbTable);
+                    _context.SaveChanges();
+
+                    //Get Saved Row ID
+                    int rowid = (int)dbTable.approvedlayoutid!;
+
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationid)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.approvedlayoutids) && !applicationDTLdata.approvedlayoutids.Contains(rowid.ToString()))
+                        {
+                            applicationDTLdata.approvedlayoutids = applicationDTLdata.approvedlayoutids + "," + rowid.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.approvedlayoutids = rowid.ToString();
+                        }
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchApprovedLayoutInfo FetchApprovedLayoutData(int approvedlayoutid)
+        {
+            try
+            {
+                ApprovedLayoutInfo dbdata = new ApprovedLayoutInfo();
+                dbdata = _context.approvedLayoutInfos.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.approvedlayoutid.Equals(approvedlayoutid) && data.isdeleted == false).FirstOrDefault()!;
+
+                FetchApprovedLayoutInfo fetchData = new FetchApprovedLayoutInfo();
+                fetchData.approvedlayoutid = dbdata.approvedlayoutid;
+                fetchData.userid = dbdata.userMaster!.userid;
+                fetchData.applicationid = dbdata.applicationDTL!.applicationid;
+                fetchData.layoutApprovingAuthority = dbdata.competent_authority_approving_the_layout;
+                fetchData.layoutOfficeName = dbdata.name_of_the_office;
+                fetchData.orderNo = dbdata.order_no;
+                fetchData.orderDate = dbdata.order_date;
+                fetchData.approvedLayoutNo = dbdata.approved_layout_drawing_no;
+                fetchData.approvedLayoutDate = dbdata.approved_layout_drawing_date;
+                fetchData.measurementRegNo = dbdata.measurement_no;
+                fetchData.measurementDate = dbdata.measurement_date;
+                fetchData.isLayoutAttached = dbdata.is_it_attached_to_the_approved_layout_case;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteApprovedLayoutData(DeleteApprovedLayoutData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    var entity = _context.approvedLayoutInfos.FirstOrDefault(s => s.approvedlayoutid == deleteMutation.approvedlayoutid! && s.isdeleted == false)!;
+                    if (entity != null)
+                    {
+                        entity.isdeleted = true;
+                        entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                        _context.approvedLayoutInfos.Attach(entity);
+                        _context.SaveChanges();
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string approvedlayoutids = applicationDTLdata.approvedlayoutids!;
+                            string[] mutationids = approvedlayoutids.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.approvedlayoutid.ToString());
+
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.approvedlayoutids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                            var checkUpdatedIds = mutationids.Where(id => id != deleteMutation.approvedlayoutid.ToString()).ToArray();
+                        }
+                        scope.Complete();
+                        return "Success";
+                    }
+                    else { return "False"; }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
             }
         }
     }
