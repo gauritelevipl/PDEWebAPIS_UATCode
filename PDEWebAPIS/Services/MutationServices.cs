@@ -17412,6 +17412,12 @@ namespace PDEWebAPIS.Services
                 mutationgivertype = "आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे";
                 mutationtakertype = "";
             }
+            //मंजूर लेआऊट
+            else if (applicationDTL.mutation_type_code == "33")
+            {
+                mutationgivertype = "मंजूर लेआऊट";
+                mutationtakertype = "";
+            }
             application.fetchHibanamaWitnessInfoDataList = fetchHibanamaWitnessInfoDataList;
             //Mutation Giver 
             List<dynamic> giver = mutationgiverData(applicationDTL);
@@ -18112,6 +18118,28 @@ namespace PDEWebAPIS.Services
                     }
                 }
             }
+            // मंजूर लेआऊट
+            else if (applicationDTL.mutation_type_code == "33")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.approvedlayoutids))
+                {
+                    string[] approvedlayoutIds = applicationDTL.approvedlayoutids.Split(",");
+
+                    if (approvedlayoutIds.Length > 0)
+                    {
+                        for (int i = 0; i < approvedlayoutIds.Length; i++)
+                        {
+                            FetchApprovedLayoutInfo fetchApprovedLayoutInfo = new FetchApprovedLayoutInfo();
+                            fetchApprovedLayoutInfo = FetchApprovedLayoutData(Convert.ToInt32(approvedlayoutIds[i]));
+                            if (fetchApprovedLayoutInfo != null)
+                            {
+                                mutationgiver.Add(fetchApprovedLayoutInfo);
+                            }
+                        }
+                    }
+                }
+            }
             return mutationgiver;
         }
         public List<dynamic> mutationtakerData(ApplicationDTL applicationDTL)
@@ -18334,6 +18362,11 @@ namespace PDEWebAPIS.Services
             }
             // आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे
             else if (applicationDTL.mutation_type_code == "44")
+            {
+                mutationtaker = null;
+            }
+            // मंजूर लेआऊट
+            else if (applicationDTL.mutation_type_code == "33")
             {
                 mutationtaker = null;
             }
