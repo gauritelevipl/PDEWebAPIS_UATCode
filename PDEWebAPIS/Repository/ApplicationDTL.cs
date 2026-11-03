@@ -58,5 +58,8 @@ namespace PDEWebAPIS.Repository
 
         // Below code added on 22 Oct 26
         public string? approvedlayoutids {  set; get; }
+
+        // Below code added on 03 Nov 26
+        public string? nonagriculturalids { set; get; }
     }
 }

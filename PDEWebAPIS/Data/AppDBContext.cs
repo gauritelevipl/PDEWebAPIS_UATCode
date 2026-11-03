@@ -558,6 +558,56 @@ namespace PDEWebAPIS.Data
             modelBuilder.Entity<ApprovedLayoutInfo>()
          .Property(b => b.deleteddate)
          .HasDefaultValueSql("1900-01-01");
+
+            // Below code added on 02 Nov 26
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.orderno)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.orderdate)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.approved_drawing_plan)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.approved_drawing_no)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.approved_drawing_date)
+            .HasDefaultValue("NA");
+
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.receipt_no_for_non_agricultural_assessment)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.receipt_date_for_non_agricultural_assessment)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.amount_of_non_agricultural_assessment)
+            .HasDefaultValue("0");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.area_as_per_the_latest_report)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.area_as_per_non_agricultural_assessment)
+            .HasDefaultValue("NA");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+            .Property(b => b.plot_no)
+            .HasDefaultValue("NA");
+
+            modelBuilder.Entity<NonAgriculturalDTL>()
+      .Property(b => b.createddatetime)
+      .HasDefaultValueSql("current_timestamp");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+          .Property(b => b.isdeleted)
+          .HasDefaultValue(false);
+            modelBuilder.Entity<NonAgriculturalDTL>()
+         .Property(b => b.deleteddate)
+         .HasDefaultValueSql("1900-01-01");
+            modelBuilder.Entity<NonAgriculturalDTL>()
+           .Property(b => b.non_agricultural_flag)
+           .HasDefaultValue("NONAGRICULTURALORDER");
+
         }
 
         public DbSet<PropertyTypeMaster> propertyTypes { get; set; }
@@ -607,5 +657,7 @@ namespace PDEWebAPIS.Data
         public DbSet<DeclarationEntryInfo> declarationEntryInfos { get; set; }
         public DbSet<AttachmentOrderInfo> attachmentOrderInfos { get; set; }
         public DbSet<ApprovedLayoutInfo> approvedLayoutInfos { get; set; }
+        //Below code added on 02 Nov 26
+        public DbSet<NonAgriculturalDTL> nonAgriculturalDTLs { get; set; }
     }
 }

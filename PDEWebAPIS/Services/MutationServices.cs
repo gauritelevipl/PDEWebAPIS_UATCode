@@ -28262,5 +28262,214 @@ namespace PDEWebAPIS.Services
                 }
             }
         }
+
+        // बिनशेती आदेश
+        public string SaveNonAgriculturalOrder(NonAgriculturalOrderInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationId!)!;
+                    //Assign Data to Table fields to insert new records
+                    NonAgriculturalDTL dbTable = new NonAgriculturalDTL();
+                    dbTable.userMaster = userMaster;
+                    dbTable.applicationDTL = applicationDTL;
+                    dbTable.competentauthority = inputData.authority;
+                    dbTable.office_name = inputData.office;
+                    dbTable.orderno = inputData.orderNo;
+                    dbTable.orderdate = inputData.orderDate;
+                    dbTable.approved_drawing_plan = inputData.recordBook;
+                    dbTable.approved_drawing_no = inputData.recordBookNo;
+                    dbTable.approved_drawing_date = inputData.recordBookDate;
+                    dbTable.non_agricultural_flag = "NONAGRICULTURALORDER";
+                    _context.nonAgriculturalDTLs.Add(dbTable);
+                    _context.SaveChanges();
+
+                    //Get Saved Row ID
+                    int rowid = (int)dbTable.nonagriculturalid!;
+
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationId)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.nonagriculturalids) && !applicationDTLdata.nonagriculturalids.Contains(rowid.ToString()))
+                        {
+                            applicationDTLdata.nonagriculturalids = applicationDTLdata.nonagriculturalids + "," + rowid.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.nonagriculturalids = rowid.ToString();
+                        }
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchNonAgriculturalOrderInfo FetchNonAgriculturalOrderData(int nonagriculturalid)
+        {
+            try
+            {
+                NonAgriculturalDTL dbdata = new NonAgriculturalDTL();
+                dbdata = _context.nonAgriculturalDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.nonagriculturalid.Equals(nonagriculturalid) && data.non_agricultural_flag == "NONAGRICULTURALORDER" && data.isdeleted == false).FirstOrDefault()!;
+
+                FetchNonAgriculturalOrderInfo fetchData = new FetchNonAgriculturalOrderInfo();
+                if (dbdata != null)
+                {
+                    fetchData.nonagriculturalid = dbdata.nonagriculturalid;
+                    fetchData.userid = dbdata.userMaster!.userid;
+                    fetchData.applicationId = dbdata.applicationDTL!.applicationid;
+                    fetchData.authority = dbdata.competentauthority;
+                    fetchData.office = dbdata.office_name;
+                    fetchData.orderNo = dbdata.orderno;
+                    fetchData.orderDate = dbdata.orderdate;
+                    fetchData.recordBook = dbdata.approved_drawing_plan;
+                    fetchData.recordBookNo = dbdata.approved_drawing_no;
+                    fetchData.recordBookDate = dbdata.approved_drawing_date;
+                }
+                else
+                {
+                    fetchData = null;
+                }
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteNonAgriculturalData(DeleteNonAgriculturalData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    var entity = _context.nonAgriculturalDTLs.FirstOrDefault(s => s.nonagriculturalid == deleteMutation.nonagriculturalid! && s.isdeleted == false)!;
+                    if (entity != null)
+                    {
+                        entity.isdeleted = true;
+                        entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                        _context.nonAgriculturalDTLs.Attach(entity);
+                        _context.SaveChanges();
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string nonagriculturalids = applicationDTLdata.nonagriculturalids!;
+                            string[] mutationids = nonagriculturalids.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.nonagriculturalid.ToString());
+
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.nonagriculturalids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                            var checkUpdatedIds = mutationids.Where(id => id != deleteMutation.nonagriculturalid.ToString()).ToArray();
+                        }
+                        scope.Complete();
+                        return "Success";
+                    }
+                    else { return "False"; }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        //गैरकृषी आकारणी
+        public string SaveNonAgriculturalAssessment(NonAgriculturalAssessmentInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationId!)!;
+                    //Assign Data to Table fields to insert new records
+                    NonAgriculturalDTL dbTable = new NonAgriculturalDTL();
+                    dbTable.userMaster = userMaster;
+                    dbTable.applicationDTL = applicationDTL;
+                    dbTable.competentauthority = inputData.competentAuthority;
+                    dbTable.office_name = inputData.collectingOfficeName;
+                    dbTable.receipt_no_for_non_agricultural_assessment = inputData.receiptNo;
+                    dbTable.receipt_date_for_non_agricultural_assessment = inputData.receiptDate;
+                    dbTable.amount_of_non_agricultural_assessment = inputData.assessmentAmount;
+                    dbTable.area_as_per_the_latest_report = inputData.akhivArea;
+                    dbTable.area_as_per_non_agricultural_assessment = inputData.gairKrushiArea;
+                    dbTable.plot_no = inputData.bhukhandNo;
+                    dbTable.non_agricultural_flag = "NONAGRICULTURALASSESSMENT";
+                    _context.nonAgriculturalDTLs.Add(dbTable);
+                    _context.SaveChanges();
+
+                    //Get Saved Row ID
+                    int rowid = (int)dbTable.nonagriculturalid!;
+
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationId)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.nonagriculturalids) && !applicationDTLdata.nonagriculturalids.Contains(rowid.ToString()))
+                        {
+                            applicationDTLdata.nonagriculturalids = applicationDTLdata.nonagriculturalids + "," + rowid.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.nonagriculturalids = rowid.ToString();
+                        }
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchNonAgriculturalAssessmentInfo FetchNonAgriculturalAssessmentData(int nonagriculturalid)
+        {
+            try
+            {
+                NonAgriculturalDTL dbdata = new NonAgriculturalDTL();
+                dbdata = _context.nonAgriculturalDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.nonagriculturalid.Equals(nonagriculturalid) && data.non_agricultural_flag == "NONAGRICULTURALASSESSMENT" && data.isdeleted == false).FirstOrDefault()!;
+
+                FetchNonAgriculturalAssessmentInfo fetchData = new FetchNonAgriculturalAssessmentInfo();
+                if (dbdata != null)
+                {
+                    fetchData.nonagriculturalid = dbdata.nonagriculturalid;
+                    fetchData.userid = dbdata.userMaster!.userid;
+                    fetchData.applicationId = dbdata.applicationDTL!.applicationid;
+                    fetchData.competentAuthority = dbdata.competentauthority;
+                    fetchData.collectingOfficeName = dbdata.office_name;
+                    fetchData.receiptNo = dbdata.receipt_no_for_non_agricultural_assessment;
+                    fetchData.receiptDate = dbdata.receipt_date_for_non_agricultural_assessment;
+                    fetchData.assessmentAmount = dbdata.amount_of_non_agricultural_assessment;
+                    fetchData.akhivArea = dbdata.area_as_per_the_latest_report;
+                    fetchData.gairKrushiArea = dbdata.area_as_per_non_agricultural_assessment;
+                    fetchData.bhukhandNo = dbdata.plot_no;
+                }
+                else
+                {
+                    fetchData = null;
+                }
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
     }
 }

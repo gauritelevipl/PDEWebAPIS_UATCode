@@ -346,6 +346,9 @@ namespace PDEWebAPIS.Migrations
                     b.Property<string>("namechangeids")
                         .HasColumnType("text");
 
+                    b.Property<string>("nonagriculturalids")
+                        .HasColumnType("text");
+
                     b.Property<string>("office_code")
                         .HasColumnType("text");
 
@@ -2630,6 +2633,110 @@ namespace PDEWebAPIS.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PDEWebAPIS.Repository.NonAgriculturalDTL", b =>
+                {
+                    b.Property<int>("nonagriculturalid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("nonagriculturalid"));
+
+                    b.Property<string>("amount_of_non_agricultural_assessment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("0");
+
+                    b.Property<string>("applicationDTLapplicationid")
+                        .HasColumnType("text");
+
+                    b.Property<string>("approved_drawing_date")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("approved_drawing_no")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("approved_drawing_plan")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("area_as_per_non_agricultural_assessment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("area_as_per_the_latest_report")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("competentauthority")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("createddatetime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<DateOnly>("deleteddate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasDefaultValueSql("1900-01-01");
+
+                    b.Property<bool>("isdeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("non_agricultural_flag")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NONAGRICULTURALORDER");
+
+                    b.Property<string>("office_name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("orderdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("orderno")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("plot_no")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("receipt_date_for_non_agricultural_assessment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("receipt_no_for_non_agricultural_assessment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<int?>("userMasteruserid")
+                        .HasColumnType("integer");
+
+                    b.HasKey("nonagriculturalid");
+
+                    b.HasIndex("applicationDTLapplicationid");
+
+                    b.HasIndex("userMasteruserid");
+
+                    b.ToTable("non_agricultural_info");
+                });
+
             modelBuilder.Entity("PDEWebAPIS.Repository.OtpVerify", b =>
                 {
                     b.Property<string>("mobileno")
@@ -3823,6 +3930,21 @@ namespace PDEWebAPIS.Migrations
                 });
 
             modelBuilder.Entity("PDEWebAPIS.Repository.NameChangeDTL", b =>
+                {
+                    b.HasOne("PDEWebAPIS.Repository.ApplicationDTL", "applicationDTL")
+                        .WithMany()
+                        .HasForeignKey("applicationDTLapplicationid");
+
+                    b.HasOne("PDEWebAPIS.Repository.UserMaster", "userMaster")
+                        .WithMany()
+                        .HasForeignKey("userMasteruserid");
+
+                    b.Navigation("applicationDTL");
+
+                    b.Navigation("userMaster");
+                });
+
+            modelBuilder.Entity("PDEWebAPIS.Repository.NonAgriculturalDTL", b =>
                 {
                     b.HasOne("PDEWebAPIS.Repository.ApplicationDTL", "applicationDTL")
                         .WithMany()

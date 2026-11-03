@@ -3846,7 +3846,7 @@ namespace PDEWebAPIS.Controllers
         //    }
         //}
 
-        [Authorize]
+        //[Authorize]
         [HttpPost]
         [Route("SaveTrutiDocumentUpload")]
         public string SaveTrutiDocumentUpload([FromBody] string val)
