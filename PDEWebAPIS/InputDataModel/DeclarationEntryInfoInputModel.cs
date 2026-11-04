@@ -22,6 +22,13 @@
         public string? constructionStartCertDate { get; set; }
         public OccupancyCertInfo? occupancyCertNo {  get; set; }
         public string? occupancyCertDate {  get; set; }
+        // Below fields added on 04 Nov 2026
+        public string? occupancyCertNumber { get; set; }
+        public string? isDevelopmentAgreement {  get; set; }
+        public string? subRegistrarOffice {  get; set; }
+        public string? registeredDocumentNumber {  get; set; }
+        public string? documentYear {  get; set; }
+        public string? documentRegistrationDate { get; set; }
     }
     public class OccupancyCertInfo
     {

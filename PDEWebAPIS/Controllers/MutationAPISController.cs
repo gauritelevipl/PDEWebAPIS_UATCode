@@ -7781,10 +7781,11 @@ namespace PDEWebAPIS.Controllers
         [HttpPost]
         [Route("SaveDeclarationEntry")]
         public string SaveDeclarationEntry([FromBody] string val)
+        //DeclarationEntryInfoInputModel inputData)
         {
             try
             {
-                int UserID = 0;
+                int UserID =0;
                 var authorization = Request.Headers[HeaderNames.Authorization];
                 string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
                 if (string.IsNullOrEmpty(CallAPIForFlag))
@@ -7844,6 +7845,7 @@ namespace PDEWebAPIS.Controllers
         [HttpPost]
         [Route("GetDeclarationEntryInfo")]
         public string GetDeclarationEntryInfo([FromBody] string val)
+        //string ApplicationID)
         {
             try
             {
@@ -8436,7 +8438,7 @@ namespace PDEWebAPIS.Controllers
                 }
                 var decrypted = Security.DeCryptData(val);
                 AttachmentOrderMissedRecordInfoInputModel inputData = JsonConvert.DeserializeObject<AttachmentOrderMissedRecordInfoInputModel>(decrypted!)!;
-                _logger.LogInformation("Save Japti Adesh Request Data - " + decrypted);
+                _logger.LogInformation("Save Adeshane - Sanganikaran kartana sutalelya nondi ghene Request Data - " + decrypted);
                 inputData.userid = UserID;
                 string Response = mutationServices.SaveAttachmentOrderMissedRecordInfoData(inputData);
                 if (Response == "Success")
@@ -8575,7 +8577,7 @@ namespace PDEWebAPIS.Controllers
                 if (!check)
                 {
                     type = ReponseType.Failure;
-                    _logger.LogInformation("Delete Japti Kami Adesh - Inout String Is Not Encrypted");
+                    _logger.LogInformation("Delete Adeshane - Sanganikaran kartana sutalelya nondi ghene - Inout String Is Not Encrypted");
                     return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
                 }
                 var decrypted = Security.DeCryptData(val);
@@ -8597,6 +8599,636 @@ namespace PDEWebAPIS.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("Delete Adeshane - Sanganikaran kartana sutalelya nondi ghene Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        // Below code added on 22 Oct 26
+        // मंजूर लेआऊट
+        [Authorize]
+        [HttpPost]
+        [Route("SaveApprovedLayoutInfo")]
+        public string SaveApprovedLayoutInfo([FromBody] string val)
+        //ApprovedLayoutInfoInputModel inputData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Manjuri Layout - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                ApprovedLayoutInfoInputModel inputData = JsonConvert.DeserializeObject<ApprovedLayoutInfoInputModel>(decrypted!)!;
+                _logger.LogInformation("Save Manjuri Layout Request Data - " + decrypted);
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveApprovedLayoutInfoData(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationid!, "Save Manjuri Layout Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "मंजूर लेआऊट Data Is Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Manjuri Layout Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Save Manjuri Layout Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetApprovedLayoutInfo")]
+        public string GetApprovedLayoutInfo([FromBody] string val)
+        //string ApplicationID)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Manjuri Layout Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Manjuri Layout Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchApprovedLayoutInfo> dataList = new List<FetchApprovedLayoutInfo>();
+                if (!string.IsNullOrEmpty(applicationDTL.approvedlayoutids))
+                {
+                    string[] nondIDs = applicationDTL.approvedlayoutids!.Split(",");
+                    if (nondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < nondIDs.Length; i++)
+                        {
+                            FetchApprovedLayoutInfo fetchData = new FetchApprovedLayoutInfo();
+                            fetchData = mutationServices.FetchApprovedLayoutData(Convert.ToInt32(nondIDs[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "मंजूर लेआऊट Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Manjuri Layout Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteApprovedLayoutInfo")]
+        public string DeleteApprovedLayoutInfo([FromBody] string val)
+        //DeleteApprovedLayoutData delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Manjur Layout - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteApprovedLayoutData delete = JsonConvert.DeserializeObject<DeleteApprovedLayoutData>(decrypted!)!;
+                _logger.LogInformation("Delete Manjur Layout Request Data - " + decrypted);
+                string Response = mutationServices.DeleteApprovedLayoutData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Manjur Layout Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "मंजूर लेआऊट Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Manjur Layout Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Manjur Layout Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        // Below code added on 03 Nov 26
+        // बिनशेती आदेश
+        [Authorize]
+        [HttpPost]
+        [Route("SaveNonAgriculturalOrderInfo")]
+        public string SaveNonAgriculturalOrderInfo([FromBody] string val)
+        //NonAgriculturalOrderInfoInputModel inputData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Non-Agricultural Order - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                NonAgriculturalOrderInfoInputModel inputData = JsonConvert.DeserializeObject<NonAgriculturalOrderInfoInputModel>(decrypted!)!;
+                _logger.LogInformation("Save Non-Agricultural Order Request Data - " + decrypted);
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveNonAgriculturalOrder(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationId!, "Save Non-Agricultural Order Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "बिनशेती आदेश Data Is Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Non-Agricultural Order Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Save Non-Agricultural Order Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetNonAgriculturalOrderInfo")]
+        public string GetNonAgriculturalOrderInfo([FromBody] string val)
+        //string ApplicationID)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Non-Agricultural Order Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Non-Agricultural Order Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchNonAgriculturalOrderInfo> dataList = new List<FetchNonAgriculturalOrderInfo>();
+                if (!string.IsNullOrEmpty(applicationDTL.nonagriculturalids))
+                {
+                    string[] nondIDs = applicationDTL.nonagriculturalids!.Split(",");
+                    if (nondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < nondIDs.Length; i++)
+                        {
+                            FetchNonAgriculturalOrderInfo fetchData = new FetchNonAgriculturalOrderInfo();
+                            fetchData = mutationServices.FetchNonAgriculturalOrderData(Convert.ToInt32(nondIDs[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "बिनशेती आदेश Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Non-Agricultural Order Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteNonAgriculturalOrderInfo")]
+        public string DeleteNonAgriculturalOrderInfo([FromBody] string val)
+        //DeleteNonAgriculturalData delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Non-Agricultural Order - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteNonAgriculturalData delete = JsonConvert.DeserializeObject<DeleteNonAgriculturalData>(decrypted!)!;
+                _logger.LogInformation("Delete Non-Agricultural Order Request Data - " + decrypted);
+                string Response = mutationServices.DeleteNonAgriculturalData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Non-Agricultural Order Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "बिनशेती आदेश Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Non-Agricultural Order Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Non-Agricultural Order Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        // Below code added on 03 Nov 26
+        // गैरकृषी आकारणी
+        [Authorize]
+        [HttpPost]
+        [Route("SaveNonAgriculturalAssessmentInfo")]
+        public string SaveNonAgriculturalAssessmentInfo([FromBody] string val)
+        //NonAgriculturalAssessmentInfoInputModel inputData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Non-Agricultural Assessment - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                NonAgriculturalAssessmentInfoInputModel inputData = JsonConvert.DeserializeObject<NonAgriculturalAssessmentInfoInputModel>(decrypted!)!;
+                _logger.LogInformation("Save Non-Agricultural Assessment Request Data - " + decrypted);
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveNonAgriculturalAssessment(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationId!, "Save Non-Agricultural Assessment Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "गैरकृषी आकारणी Data Is Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Non-Agricultural Assessment Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Save Non-Agricultural Assessment Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetNonAgriculturalAssessmentInfo")]
+        public string GetNonAgriculturalAssessmentInfo([FromBody] string val)
+        //string ApplicationID)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Non-Agricultural Assessment Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Non-Agricultural Assessment Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchNonAgriculturalAssessmentInfo> dataList = new List<FetchNonAgriculturalAssessmentInfo>();
+                if (!string.IsNullOrEmpty(applicationDTL.nonagriculturalids))
+                {
+                    string[] nondIDs = applicationDTL.nonagriculturalids!.Split(",");
+                    if (nondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < nondIDs.Length; i++)
+                        {
+                            FetchNonAgriculturalAssessmentInfo fetchData = new FetchNonAgriculturalAssessmentInfo();
+                            fetchData = mutationServices.FetchNonAgriculturalAssessmentData(Convert.ToInt32(nondIDs[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "गैरकृषी आकारणी Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Non-Agricultural Assessment Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteNonAgriculturalAssessmentInfo")]
+        public string DeleteNonAgriculturalAssessmentInfo([FromBody] string val)
+        //DeleteNonAgriculturalData delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Non-Agricultural Assessment - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteNonAgriculturalData delete = JsonConvert.DeserializeObject<DeleteNonAgriculturalData>(decrypted!)!;
+                _logger.LogInformation("Delete Non-Agricultural Assessment Request Data - " + decrypted);
+                string Response = mutationServices.DeleteNonAgriculturalData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Non-Agricultural Assessment Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "गैरकृषी आकारणी Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Non-Agricultural Assessment Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Non-Agricultural Assessment Exception - " + ex.StackTrace!.ToString());
                 if (ex.Message.ToString() == "User Not Found")
                 {
                     return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));

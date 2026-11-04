@@ -17412,6 +17412,18 @@ namespace PDEWebAPIS.Services
                 mutationgivertype = "आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे";
                 mutationtakertype = "";
             }
+            //मंजूर लेआऊट
+            else if (applicationDTL.mutation_type_code == "33")
+            {
+                mutationgivertype = "मंजूर लेआऊट";
+                mutationtakertype = "";
+            }
+            //बिनशेती आदेश
+            else if (applicationDTL.mutation_type_code == "32")
+            {
+                mutationgivertype = "बिनशेती आदेश";
+                mutationtakertype = "";
+            }
             application.fetchHibanamaWitnessInfoDataList = fetchHibanamaWitnessInfoDataList;
             //Mutation Giver 
             List<dynamic> giver = mutationgiverData(applicationDTL);
@@ -18112,6 +18124,50 @@ namespace PDEWebAPIS.Services
                     }
                 }
             }
+            // मंजूर लेआऊट
+            else if (applicationDTL.mutation_type_code == "33")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.approvedlayoutids))
+                {
+                    string[] approvedlayoutIds = applicationDTL.approvedlayoutids.Split(",");
+
+                    if (approvedlayoutIds.Length > 0)
+                    {
+                        for (int i = 0; i < approvedlayoutIds.Length; i++)
+                        {
+                            FetchApprovedLayoutInfo fetchApprovedLayoutInfo = new FetchApprovedLayoutInfo();
+                            fetchApprovedLayoutInfo = FetchApprovedLayoutData(Convert.ToInt32(approvedlayoutIds[i]));
+                            if (fetchApprovedLayoutInfo != null)
+                            {
+                                mutationgiver.Add(fetchApprovedLayoutInfo);
+                            }
+                        }
+                    }
+                }
+            }
+            // बिनशेती आदेश
+            else if (applicationDTL.mutation_type_code == "32")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.nonagriculturalids))
+                {
+                    string[] nonagriculturalIds = applicationDTL.nonagriculturalids.Split(",");
+
+                    if (nonagriculturalIds.Length > 0)
+                    {
+                        for (int i = 0; i < nonagriculturalIds.Length; i++)
+                        {
+                            FetcNonAgriculturalInfo fetcNonAgriculturalInfo = new FetcNonAgriculturalInfo();
+                            fetcNonAgriculturalInfo = FetcNonAgriculturalData(Convert.ToInt32(nonagriculturalIds[i]));
+                            if (fetcNonAgriculturalInfo != null)
+                            {
+                                mutationgiver.Add(fetcNonAgriculturalInfo);
+                            }
+                        }
+                    }
+                }
+            }
             return mutationgiver;
         }
         public List<dynamic> mutationtakerData(ApplicationDTL applicationDTL)
@@ -18334,6 +18390,16 @@ namespace PDEWebAPIS.Services
             }
             // आदेशाने - संगणकीकरण करताना सुटलेल्या नोंदी घेणे
             else if (applicationDTL.mutation_type_code == "44")
+            {
+                mutationtaker = null;
+            }
+            // मंजूर लेआऊट
+            else if (applicationDTL.mutation_type_code == "33")
+            {
+                mutationtaker = null;
+            }
+            // बिनशेती आदेश
+            else if (applicationDTL.mutation_type_code == "32")
             {
                 mutationtaker = null;
             }
@@ -27636,6 +27702,17 @@ namespace PDEWebAPIS.Services
                     dbTable.occupancy_certificate_file_name = "NA";
                     dbTable.occupancy_certificate_file_path = "NA";
                     dbTable.occupancy_certificate_date = inputData.ghoshnaPatraDetails!.occupancyCertDate;
+                    // Below fields added on 04 Nov 2026
+                    dbTable.occupancy_certificate_number = inputData.ghoshnaPatraDetails!.occupancyCertNumber;
+                    dbTable.is_there_a_development_agreement = inputData.ghoshnaPatraDetails!.isDevelopmentAgreement!.ToUpper();
+                    if (inputData.ghoshnaPatraDetails!.isDevelopmentAgreement!.ToUpper() == "YES")
+                    {
+                        dbTable.sub_registrar_office = inputData.ghoshnaPatraDetails!.subRegistrarOffice;
+                        dbTable.reg_document_no = inputData.ghoshnaPatraDetails!.registeredDocumentNumber;
+                        dbTable.document_year = inputData.ghoshnaPatraDetails!.documentYear;
+                        dbTable.document_registration_date = inputData.ghoshnaPatraDetails!.documentRegistrationDate;
+                    }
+                    //End
                     _context.declarationEntryInfos.Add(dbTable);
                     _context.SaveChanges();
 
@@ -27732,6 +27809,12 @@ namespace PDEWebAPIS.Services
                 ghoshnaPatraDetails.mapApprovalOrderDate = dbdata.map_approval_order_date;
                 ghoshnaPatraDetails.constructionStartCertNo = dbdata.construction_start_cert_no;
                 ghoshnaPatraDetails.constructionStartCertDate = dbdata.construction_start_cert_date;
+                ghoshnaPatraDetails.occupancyCertNumber = dbdata.occupancy_certificate_number;
+                ghoshnaPatraDetails.isDevelopmentAgreement = dbdata.is_there_a_development_agreement;
+                ghoshnaPatraDetails.subRegistrarOffice = dbdata.sub_registrar_office;
+                ghoshnaPatraDetails.registeredDocumentNumber = dbdata.reg_document_no;
+                ghoshnaPatraDetails.documentYear = dbdata.document_year;
+                ghoshnaPatraDetails.documentRegistrationDate = dbdata.document_registration_date;
 
                 OccupancyCertInfo occupancyCertNo = new OccupancyCertInfo();
                 occupancyCertNo.name = dbdata.occupancy_certificate_file_name;
@@ -27913,7 +27996,6 @@ namespace PDEWebAPIS.Services
             {
                 try
                 {
-                    MethodForFileUpload methodForFileUpload = new MethodForFileUpload();
                     var entity = _context.attachmentOrderInfos.FirstOrDefault(s => s.attachmentorderid == deleteMutation.attachmentorderid! && s.isDeleted == false)!;
                     if (entity != null)
                     {
@@ -28111,5 +28193,368 @@ namespace PDEWebAPIS.Services
                 throw new HandleException(ex.Message.ToString());
             }
         }
+
+        // मंजूर लेआऊट
+        public string SaveApprovedLayoutInfoData(ApprovedLayoutInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationid!)!;
+                    //Assign Data to Table fields to insert new records
+                    ApprovedLayoutInfo dbTable = new ApprovedLayoutInfo();
+                    dbTable.userMaster = userMaster;
+                    dbTable.applicationDTL = applicationDTL;
+                    dbTable.competent_authority_approving_the_layout = inputData.layoutApprovingAuthority;
+                    dbTable.name_of_the_office = inputData.layoutOfficeName;
+                    dbTable.order_no = inputData.orderNo;
+                    dbTable.order_date = inputData.orderDate;
+                    dbTable.approved_layout_drawing_no = inputData.approvedLayoutNo;
+                    dbTable.approved_layout_drawing_date = inputData.approvedLayoutDate;
+                    dbTable.measurement_no = inputData.measurementRegNo;
+                    dbTable.measurement_date = inputData.measurementDate;
+                    dbTable.is_it_attached_to_the_approved_layout_case = inputData.isLayoutAttached!.ToUpper();
+                    _context.approvedLayoutInfos.Add(dbTable);
+                    _context.SaveChanges();
+
+                    //Get Saved Row ID
+                    int rowid = (int)dbTable.approvedlayoutid!;
+
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationid)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.approvedlayoutids) && !applicationDTLdata.approvedlayoutids.Contains(rowid.ToString()))
+                        {
+                            applicationDTLdata.approvedlayoutids = applicationDTLdata.approvedlayoutids + "," + rowid.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.approvedlayoutids = rowid.ToString();
+                        }
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchApprovedLayoutInfo FetchApprovedLayoutData(int approvedlayoutid)
+        {
+            try
+            {
+                ApprovedLayoutInfo dbdata = new ApprovedLayoutInfo();
+                dbdata = _context.approvedLayoutInfos.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.approvedlayoutid.Equals(approvedlayoutid) && data.isdeleted == false).FirstOrDefault()!;
+
+                FetchApprovedLayoutInfo fetchData = new FetchApprovedLayoutInfo();
+                fetchData.approvedlayoutid = dbdata.approvedlayoutid;
+                fetchData.userid = dbdata.userMaster!.userid;
+                fetchData.applicationid = dbdata.applicationDTL!.applicationid;
+                fetchData.layoutApprovingAuthority = dbdata.competent_authority_approving_the_layout;
+                fetchData.layoutOfficeName = dbdata.name_of_the_office;
+                fetchData.orderNo = dbdata.order_no;
+                fetchData.orderDate = dbdata.order_date;
+                fetchData.approvedLayoutNo = dbdata.approved_layout_drawing_no;
+                fetchData.approvedLayoutDate = dbdata.approved_layout_drawing_date;
+                fetchData.measurementRegNo = dbdata.measurement_no;
+                fetchData.measurementDate = dbdata.measurement_date;
+                fetchData.isLayoutAttached = dbdata.is_it_attached_to_the_approved_layout_case;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteApprovedLayoutData(DeleteApprovedLayoutData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    var entity = _context.approvedLayoutInfos.FirstOrDefault(s => s.approvedlayoutid == deleteMutation.approvedlayoutid! && s.isdeleted == false)!;
+                    if (entity != null)
+                    {
+                        entity.isdeleted = true;
+                        entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                        _context.approvedLayoutInfos.Attach(entity);
+                        _context.SaveChanges();
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string approvedlayoutids = applicationDTLdata.approvedlayoutids!;
+                            string[] mutationids = approvedlayoutids.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.approvedlayoutid.ToString());
+
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.approvedlayoutids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                            var checkUpdatedIds = mutationids.Where(id => id != deleteMutation.approvedlayoutid.ToString()).ToArray();
+                        }
+                        scope.Complete();
+                        return "Success";
+                    }
+                    else { return "False"; }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        // बिनशेती आदेश
+        public string SaveNonAgriculturalOrder(NonAgriculturalOrderInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationId!)!;
+                    //Assign Data to Table fields to insert new records
+                    NonAgriculturalDTL dbTable = new NonAgriculturalDTL();
+                    dbTable.userMaster = userMaster;
+                    dbTable.applicationDTL = applicationDTL;
+                    dbTable.competentauthority = inputData.authority;
+                    dbTable.office_name = inputData.office;
+                    dbTable.orderno = inputData.orderNo;
+                    dbTable.orderdate = inputData.orderDate;
+                    dbTable.approved_drawing_plan = inputData.recordBook;
+                    dbTable.approved_drawing_no = inputData.recordBookNo;
+                    dbTable.approved_drawing_date = inputData.recordBookDate;
+                    dbTable.non_agricultural_flag = "NONAGRICULTURALORDER";
+                    _context.nonAgriculturalDTLs.Add(dbTable);
+                    _context.SaveChanges();
+
+                    //Get Saved Row ID
+                    int rowid = (int)dbTable.nonagriculturalid!;
+
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationId)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.nonagriculturalids) && !applicationDTLdata.nonagriculturalids.Contains(rowid.ToString()))
+                        {
+                            applicationDTLdata.nonagriculturalids = applicationDTLdata.nonagriculturalids + "," + rowid.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.nonagriculturalids = rowid.ToString();
+                        }
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchNonAgriculturalOrderInfo FetchNonAgriculturalOrderData(int nonagriculturalid)
+        {
+            try
+            {
+                NonAgriculturalDTL dbdata = new NonAgriculturalDTL();
+                dbdata = _context.nonAgriculturalDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.nonagriculturalid.Equals(nonagriculturalid) && data.non_agricultural_flag == "NONAGRICULTURALORDER" && data.isdeleted == false).FirstOrDefault()!;
+
+                FetchNonAgriculturalOrderInfo fetchData = new FetchNonAgriculturalOrderInfo();
+                if (dbdata != null)
+                {
+                    fetchData.nonagriculturalid = dbdata.nonagriculturalid;
+                    fetchData.userid = dbdata.userMaster!.userid;
+                    fetchData.applicationId = dbdata.applicationDTL!.applicationid;
+                    fetchData.authority = dbdata.competentauthority;
+                    fetchData.office = dbdata.office_name;
+                    fetchData.orderNo = dbdata.orderno;
+                    fetchData.orderDate = dbdata.orderdate;
+                    fetchData.recordBook = dbdata.approved_drawing_plan;
+                    fetchData.recordBookNo = dbdata.approved_drawing_no;
+                    fetchData.recordBookDate = dbdata.approved_drawing_date;
+                }
+                else
+                {
+                    fetchData = null;
+                }
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteNonAgriculturalData(DeleteNonAgriculturalData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    var entity = _context.nonAgriculturalDTLs.FirstOrDefault(s => s.nonagriculturalid == deleteMutation.nonagriculturalid! && s.isdeleted == false)!;
+                    if (entity != null)
+                    {
+                        entity.isdeleted = true;
+                        entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                        _context.nonAgriculturalDTLs.Attach(entity);
+                        _context.SaveChanges();
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string nonagriculturalids = applicationDTLdata.nonagriculturalids!;
+                            string[] mutationids = nonagriculturalids.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.nonagriculturalid.ToString());
+
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.nonagriculturalids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                            var checkUpdatedIds = mutationids.Where(id => id != deleteMutation.nonagriculturalid.ToString()).ToArray();
+                        }
+                        scope.Complete();
+                        return "Success";
+                    }
+                    else { return "False"; }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        //गैरकृषी आकारणी
+        public string SaveNonAgriculturalAssessment(NonAgriculturalAssessmentInfoInputModel inputData)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid!)!;
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationId!)!;
+                    //Assign Data to Table fields to insert new records
+                    NonAgriculturalDTL dbTable = new NonAgriculturalDTL();
+                    dbTable.userMaster = userMaster;
+                    dbTable.applicationDTL = applicationDTL;
+                    dbTable.competentauthority = inputData.competentAuthority;
+                    dbTable.office_name = inputData.collectingOfficeName;
+                    dbTable.receipt_no_for_non_agricultural_assessment = inputData.receiptNo;
+                    dbTable.receipt_date_for_non_agricultural_assessment = inputData.receiptDate;
+                    dbTable.amount_of_non_agricultural_assessment = inputData.assessmentAmount;
+                    dbTable.area_as_per_the_latest_report = inputData.akhivArea;
+                    dbTable.area_as_per_non_agricultural_assessment = inputData.gairKrushiArea;
+                    dbTable.plot_no = inputData.bhukhandNo;
+                    dbTable.non_agricultural_flag = "NONAGRICULTURALASSESSMENT";
+                    _context.nonAgriculturalDTLs.Add(dbTable);
+                    _context.SaveChanges();
+
+                    //Get Saved Row ID
+                    int rowid = (int)dbTable.nonagriculturalid!;
+
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationId)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.nonagriculturalids) && !applicationDTLdata.nonagriculturalids.Contains(rowid.ToString()))
+                        {
+                            applicationDTLdata.nonagriculturalids = applicationDTLdata.nonagriculturalids + "," + rowid.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.nonagriculturalids = rowid.ToString();
+                        }
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchNonAgriculturalAssessmentInfo FetchNonAgriculturalAssessmentData(int nonagriculturalid)
+        {
+            try
+            {
+                NonAgriculturalDTL dbdata = new NonAgriculturalDTL();
+                dbdata = _context.nonAgriculturalDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.nonagriculturalid.Equals(nonagriculturalid) && data.non_agricultural_flag == "NONAGRICULTURALASSESSMENT" && data.isdeleted == false).FirstOrDefault()!;
+
+                FetchNonAgriculturalAssessmentInfo fetchData = new FetchNonAgriculturalAssessmentInfo();
+                if (dbdata != null)
+                {
+                    fetchData.nonagriculturalid = dbdata.nonagriculturalid;
+                    fetchData.userid = dbdata.userMaster!.userid;
+                    fetchData.applicationId = dbdata.applicationDTL!.applicationid;
+                    fetchData.competentAuthority = dbdata.competentauthority;
+                    fetchData.collectingOfficeName = dbdata.office_name;
+                    fetchData.receiptNo = dbdata.receipt_no_for_non_agricultural_assessment;
+                    fetchData.receiptDate = dbdata.receipt_date_for_non_agricultural_assessment;
+                    fetchData.assessmentAmount = dbdata.amount_of_non_agricultural_assessment;
+                    fetchData.akhivArea = dbdata.area_as_per_the_latest_report;
+                    fetchData.gairKrushiArea = dbdata.area_as_per_non_agricultural_assessment;
+                    fetchData.bhukhandNo = dbdata.plot_no;
+                }
+                else
+                {
+                    fetchData = null;
+                }
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+
+        public FetcNonAgriculturalInfo FetcNonAgriculturalData(int nonagriculturalid)
+        {
+            try
+            {
+                NonAgriculturalDTL dbdata = new NonAgriculturalDTL();
+                dbdata = _context.nonAgriculturalDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.nonagriculturalid.Equals(nonagriculturalid) && data.isdeleted == false).FirstOrDefault()!;
+
+                FetcNonAgriculturalInfo fetchData = new FetcNonAgriculturalInfo();
+                fetchData.nonagriculturalid = dbdata.nonagriculturalid;
+                fetchData.applicationid = dbdata.applicationDTL!.applicationid;
+                fetchData.userid = dbdata.userMaster!.userid;
+                fetchData.competentauthority = dbdata.competentauthority;
+                fetchData.office_name = dbdata.office_name;
+                fetchData.orderno = dbdata.orderno;
+                fetchData.orderdate = dbdata.orderdate;
+                fetchData.approved_drawing_plan = dbdata.approved_drawing_plan;
+                fetchData.approved_drawing_no = dbdata.approved_drawing_no;
+                fetchData.approved_drawing_date = dbdata.approved_drawing_date;
+                fetchData.receipt_no_for_non_agricultural_assessment = dbdata.receipt_no_for_non_agricultural_assessment;
+                fetchData.receipt_date_for_non_agricultural_assessment = dbdata.receipt_date_for_non_agricultural_assessment;
+                fetchData.amount_of_non_agricultural_assessment = dbdata.amount_of_non_agricultural_assessment;
+                fetchData.area_as_per_the_latest_report = dbdata.area_as_per_the_latest_report;
+                fetchData.area_as_per_non_agricultural_assessment = dbdata.area_as_per_non_agricultural_assessment;
+                fetchData.plot_no = dbdata.plot_no;
+                fetchData.non_agricultural_flag = dbdata.non_agricultural_flag;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
     }
 }

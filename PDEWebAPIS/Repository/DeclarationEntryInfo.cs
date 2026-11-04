@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static PDEWebAPIS.InputDataModel.INameWithCodeFormatData;
 
 namespace PDEWebAPIS.Repository
 {
@@ -23,5 +24,12 @@ namespace PDEWebAPIS.Repository
         public DateTime createddatetime { get; set; }
         public bool isDeleted { set; get; }
         public DateOnly deleteddate { set; get; }
+        // Below fields added on 04 Nov 2026
+        public string? occupancy_certificate_number { get; set; }
+        public string? is_there_a_development_agreement {  get; set; }
+        public string? sub_registrar_office {  get; set; }
+        public string? reg_document_no { get; set; }
+        public string? document_year {  get; set; }
+        public string? document_registration_date {  get; set; }
     }
 }

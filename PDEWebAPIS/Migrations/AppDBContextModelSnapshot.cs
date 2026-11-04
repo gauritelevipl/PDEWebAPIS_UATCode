@@ -267,6 +267,9 @@ namespace PDEWebAPIS.Migrations
                     b.Property<int?>("applicationTypeMasterapplicationtypeid")
                         .HasColumnType("integer");
 
+                    b.Property<string>("approvedlayoutids")
+                        .HasColumnType("text");
+
                     b.Property<string>("attachmentorderids")
                         .HasColumnType("text");
 
@@ -341,6 +344,9 @@ namespace PDEWebAPIS.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("namechangeids")
+                        .HasColumnType("text");
+
+                    b.Property<string>("nonagriculturalids")
                         .HasColumnType("text");
 
                     b.Property<string>("office_code")
@@ -476,6 +482,71 @@ namespace PDEWebAPIS.Migrations
                     b.ToTable("applicationtypemaster");
                 });
 
+            modelBuilder.Entity("PDEWebAPIS.Repository.ApprovedLayoutInfo", b =>
+                {
+                    b.Property<int>("approvedlayoutid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("approvedlayoutid"));
+
+                    b.Property<string>("applicationDTLapplicationid")
+                        .HasColumnType("text");
+
+                    b.Property<string>("approved_layout_drawing_date")
+                        .HasColumnType("text");
+
+                    b.Property<string>("approved_layout_drawing_no")
+                        .HasColumnType("text");
+
+                    b.Property<string>("competent_authority_approving_the_layout")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("createddatetime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<DateOnly>("deleteddate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasDefaultValueSql("1900-01-01");
+
+                    b.Property<string>("is_it_attached_to_the_approved_layout_case")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("isdeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("measurement_date")
+                        .HasColumnType("text");
+
+                    b.Property<string>("measurement_no")
+                        .HasColumnType("text");
+
+                    b.Property<string>("name_of_the_office")
+                        .HasColumnType("text");
+
+                    b.Property<string>("order_date")
+                        .HasColumnType("text");
+
+                    b.Property<string>("order_no")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("userMasteruserid")
+                        .HasColumnType("integer");
+
+                    b.HasKey("approvedlayoutid");
+
+                    b.HasIndex("applicationDTLapplicationid");
+
+                    b.HasIndex("userMasteruserid");
+
+                    b.ToTable("approved_layout_info");
+                });
+
             modelBuilder.Entity("PDEWebAPIS.Repository.AttachmentOrderInfo", b =>
                 {
                     b.Property<int>("attachmentorderid")
@@ -499,11 +570,10 @@ namespace PDEWebAPIS.Migrations
                     b.Property<string>("attachment_order_number")
                         .HasColumnType("text");
 
-                    b.Property<string>("by_order_recording_entries_that_were_missed_during_computerization")
+                    b.Property<string>("by_order_recording_entries_were_missed_during_computerization")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text")
-                        .HasDefaultValue("NA")
-                        .HasColumnName("by_order_recording_entries_that_were_missed_during_computeriza~");
+                        .HasDefaultValue("NA");
 
                     b.Property<DateTime>("createddatetime")
                         .ValueGeneratedOnAdd()
@@ -563,11 +633,10 @@ namespace PDEWebAPIS.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("NA");
 
-                    b.Property<string>("recovery_cert_under_section_101_issued_by_the_cooperative_officer")
+                    b.Property<string>("recovery_cert_under_section_101_issued_by_cooperative_officer")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text")
-                        .HasDefaultValue("NA")
-                        .HasColumnName("recovery_cert_under_section_101_issued_by_the_cooperative_offi~");
+                        .HasDefaultValue("NA");
 
                     b.Property<int?>("userMasteruserid")
                         .HasColumnType("integer");
@@ -840,10 +909,25 @@ namespace PDEWebAPIS.Migrations
                         .HasColumnType("date")
                         .HasDefaultValueSql("1900-01-01");
 
+                    b.Property<string>("document_registration_date")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("document_year")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
                     b.Property<bool>("isDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
+
+                    b.Property<string>("is_there_a_development_agreement")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NO");
 
                     b.Property<string>("map_approval_order_date")
                         .HasColumnType("text");
@@ -859,6 +943,19 @@ namespace PDEWebAPIS.Migrations
 
                     b.Property<string>("occupancy_certificate_file_path")
                         .HasColumnType("text");
+
+                    b.Property<string>("occupancy_certificate_number")
+                        .HasColumnType("text");
+
+                    b.Property<string>("reg_document_no")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("sub_registrar_office")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
 
                     b.Property<string>("type_of_authority_approving_the_construction_plan")
                         .HasColumnType("text");
@@ -2564,6 +2661,110 @@ namespace PDEWebAPIS.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PDEWebAPIS.Repository.NonAgriculturalDTL", b =>
+                {
+                    b.Property<int>("nonagriculturalid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("nonagriculturalid"));
+
+                    b.Property<string>("amount_of_non_agricultural_assessment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("0");
+
+                    b.Property<string>("applicationDTLapplicationid")
+                        .HasColumnType("text");
+
+                    b.Property<string>("approved_drawing_date")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("approved_drawing_no")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("approved_drawing_plan")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("area_as_per_non_agricultural_assessment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("area_as_per_the_latest_report")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("competentauthority")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("createddatetime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<DateOnly>("deleteddate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasDefaultValueSql("1900-01-01");
+
+                    b.Property<bool>("isdeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("non_agricultural_flag")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NONAGRICULTURALORDER");
+
+                    b.Property<string>("office_name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("orderdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("orderno")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("plot_no")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("receipt_date_for_non_agricultural_assessment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("receipt_no_for_non_agricultural_assessment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<int?>("userMasteruserid")
+                        .HasColumnType("integer");
+
+                    b.HasKey("nonagriculturalid");
+
+                    b.HasIndex("applicationDTLapplicationid");
+
+                    b.HasIndex("userMasteruserid");
+
+                    b.ToTable("non_agricultural_info");
+                });
+
             modelBuilder.Entity("PDEWebAPIS.Repository.OtpVerify", b =>
                 {
                     b.Property<string>("mobileno")
@@ -3591,6 +3792,21 @@ namespace PDEWebAPIS.Migrations
                     b.Navigation("userMaster");
                 });
 
+            modelBuilder.Entity("PDEWebAPIS.Repository.ApprovedLayoutInfo", b =>
+                {
+                    b.HasOne("PDEWebAPIS.Repository.ApplicationDTL", "applicationDTL")
+                        .WithMany()
+                        .HasForeignKey("applicationDTLapplicationid");
+
+                    b.HasOne("PDEWebAPIS.Repository.UserMaster", "userMaster")
+                        .WithMany()
+                        .HasForeignKey("userMasteruserid");
+
+                    b.Navigation("applicationDTL");
+
+                    b.Navigation("userMaster");
+                });
+
             modelBuilder.Entity("PDEWebAPIS.Repository.AttachmentOrderInfo", b =>
                 {
                     b.HasOne("PDEWebAPIS.Repository.ApplicationDTL", "applicationDTL")
@@ -3742,6 +3958,21 @@ namespace PDEWebAPIS.Migrations
                 });
 
             modelBuilder.Entity("PDEWebAPIS.Repository.NameChangeDTL", b =>
+                {
+                    b.HasOne("PDEWebAPIS.Repository.ApplicationDTL", "applicationDTL")
+                        .WithMany()
+                        .HasForeignKey("applicationDTLapplicationid");
+
+                    b.HasOne("PDEWebAPIS.Repository.UserMaster", "userMaster")
+                        .WithMany()
+                        .HasForeignKey("userMasteruserid");
+
+                    b.Navigation("applicationDTL");
+
+                    b.Navigation("userMaster");
+                });
+
+            modelBuilder.Entity("PDEWebAPIS.Repository.NonAgriculturalDTL", b =>
                 {
                     b.HasOne("PDEWebAPIS.Repository.ApplicationDTL", "applicationDTL")
                         .WithMany()

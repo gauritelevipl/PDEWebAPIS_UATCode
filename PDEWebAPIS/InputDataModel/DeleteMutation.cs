@@ -45,6 +45,16 @@
         public int? attachmentorderid { set; get; }
         public string? applicationid { set; get; }
     }
+    public class DeleteApprovedLayoutData
+    {
+        public int? approvedlayoutid { set; get; }
+        public string? applicationid { set; get; }
+    }
+    public class DeleteNonAgriculturalData
+    {
+        public int? nonagriculturalid { set; get; }
+        public string? applicationid { set; get; }
+    }
 }
 
      
