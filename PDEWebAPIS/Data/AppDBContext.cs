@@ -608,6 +608,22 @@ namespace PDEWebAPIS.Data
            .Property(b => b.non_agricultural_flag)
            .HasDefaultValue("NONAGRICULTURALORDER");
 
+            // Below code added on 04 Nov 2026
+            modelBuilder.Entity<DeclarationEntryInfo>()
+          .Property(b => b.sub_registrar_office)
+          .HasDefaultValue("NA");
+            modelBuilder.Entity<DeclarationEntryInfo>()
+         .Property(b => b.reg_document_no)
+         .HasDefaultValue("NA");
+            modelBuilder.Entity<DeclarationEntryInfo>()
+         .Property(b => b.document_year)
+         .HasDefaultValue("NA");
+            modelBuilder.Entity<DeclarationEntryInfo>()
+         .Property(b => b.document_registration_date)
+         .HasDefaultValue("NA");
+            modelBuilder.Entity<DeclarationEntryInfo>()
+      .Property(b => b.is_there_a_development_agreement)
+      .HasDefaultValue("NO");
         }
 
         public DbSet<PropertyTypeMaster> propertyTypes { get; set; }

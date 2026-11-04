@@ -17418,6 +17418,12 @@ namespace PDEWebAPIS.Services
                 mutationgivertype = "मंजूर लेआऊट";
                 mutationtakertype = "";
             }
+            //बिनशेती आदेश
+            else if (applicationDTL.mutation_type_code == "32")
+            {
+                mutationgivertype = "बिनशेती आदेश";
+                mutationtakertype = "";
+            }
             application.fetchHibanamaWitnessInfoDataList = fetchHibanamaWitnessInfoDataList;
             //Mutation Giver 
             List<dynamic> giver = mutationgiverData(applicationDTL);
@@ -18140,6 +18146,28 @@ namespace PDEWebAPIS.Services
                     }
                 }
             }
+            // बिनशेती आदेश
+            else if (applicationDTL.mutation_type_code == "32")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.nonagriculturalids))
+                {
+                    string[] nonagriculturalIds = applicationDTL.nonagriculturalids.Split(",");
+
+                    if (nonagriculturalIds.Length > 0)
+                    {
+                        for (int i = 0; i < nonagriculturalIds.Length; i++)
+                        {
+                            FetcNonAgriculturalInfo fetcNonAgriculturalInfo = new FetcNonAgriculturalInfo();
+                            fetcNonAgriculturalInfo = FetcNonAgriculturalData(Convert.ToInt32(nonagriculturalIds[i]));
+                            if (fetcNonAgriculturalInfo != null)
+                            {
+                                mutationgiver.Add(fetcNonAgriculturalInfo);
+                            }
+                        }
+                    }
+                }
+            }
             return mutationgiver;
         }
         public List<dynamic> mutationtakerData(ApplicationDTL applicationDTL)
@@ -18367,6 +18395,11 @@ namespace PDEWebAPIS.Services
             }
             // मंजूर लेआऊट
             else if (applicationDTL.mutation_type_code == "33")
+            {
+                mutationtaker = null;
+            }
+            // बिनशेती आदेश
+            else if (applicationDTL.mutation_type_code == "32")
             {
                 mutationtaker = null;
             }
@@ -27669,6 +27702,17 @@ namespace PDEWebAPIS.Services
                     dbTable.occupancy_certificate_file_name = "NA";
                     dbTable.occupancy_certificate_file_path = "NA";
                     dbTable.occupancy_certificate_date = inputData.ghoshnaPatraDetails!.occupancyCertDate;
+                    // Below fields added on 04 Nov 2026
+                    dbTable.occupancy_certificate_number = inputData.ghoshnaPatraDetails!.occupancyCertNumber;
+                    dbTable.is_there_a_development_agreement = inputData.ghoshnaPatraDetails!.isDevelopmentAgreement!.ToUpper();
+                    if (inputData.ghoshnaPatraDetails!.isDevelopmentAgreement!.ToUpper() == "YES")
+                    {
+                        dbTable.sub_registrar_office = inputData.ghoshnaPatraDetails!.subRegistrarOffice;
+                        dbTable.reg_document_no = inputData.ghoshnaPatraDetails!.registeredDocumentNumber;
+                        dbTable.document_year = inputData.ghoshnaPatraDetails!.documentYear;
+                        dbTable.document_registration_date = inputData.ghoshnaPatraDetails!.documentRegistrationDate;
+                    }
+                    //End
                     _context.declarationEntryInfos.Add(dbTable);
                     _context.SaveChanges();
 
@@ -27765,6 +27809,12 @@ namespace PDEWebAPIS.Services
                 ghoshnaPatraDetails.mapApprovalOrderDate = dbdata.map_approval_order_date;
                 ghoshnaPatraDetails.constructionStartCertNo = dbdata.construction_start_cert_no;
                 ghoshnaPatraDetails.constructionStartCertDate = dbdata.construction_start_cert_date;
+                ghoshnaPatraDetails.occupancyCertNumber = dbdata.occupancy_certificate_number;
+                ghoshnaPatraDetails.isDevelopmentAgreement = dbdata.is_there_a_development_agreement;
+                ghoshnaPatraDetails.subRegistrarOffice = dbdata.sub_registrar_office;
+                ghoshnaPatraDetails.registeredDocumentNumber = dbdata.reg_document_no;
+                ghoshnaPatraDetails.documentYear = dbdata.document_year;
+                ghoshnaPatraDetails.documentRegistrationDate = dbdata.document_registration_date;
 
                 OccupancyCertInfo occupancyCertNo = new OccupancyCertInfo();
                 occupancyCertNo.name = dbdata.occupancy_certificate_file_name;
@@ -28471,5 +28521,40 @@ namespace PDEWebAPIS.Services
                 throw new HandleException(ex.Message.ToString());
             }
         }
+
+
+        public FetcNonAgriculturalInfo FetcNonAgriculturalData(int nonagriculturalid)
+        {
+            try
+            {
+                NonAgriculturalDTL dbdata = new NonAgriculturalDTL();
+                dbdata = _context.nonAgriculturalDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.nonagriculturalid.Equals(nonagriculturalid) && data.isdeleted == false).FirstOrDefault()!;
+
+                FetcNonAgriculturalInfo fetchData = new FetcNonAgriculturalInfo();
+                fetchData.nonagriculturalid = dbdata.nonagriculturalid;
+                fetchData.applicationid = dbdata.applicationDTL!.applicationid;
+                fetchData.userid = dbdata.userMaster!.userid;
+                fetchData.competentauthority = dbdata.competentauthority;
+                fetchData.office_name = dbdata.office_name;
+                fetchData.orderno = dbdata.orderno;
+                fetchData.orderdate = dbdata.orderdate;
+                fetchData.approved_drawing_plan = dbdata.approved_drawing_plan;
+                fetchData.approved_drawing_no = dbdata.approved_drawing_no;
+                fetchData.approved_drawing_date = dbdata.approved_drawing_date;
+                fetchData.receipt_no_for_non_agricultural_assessment = dbdata.receipt_no_for_non_agricultural_assessment;
+                fetchData.receipt_date_for_non_agricultural_assessment = dbdata.receipt_date_for_non_agricultural_assessment;
+                fetchData.amount_of_non_agricultural_assessment = dbdata.amount_of_non_agricultural_assessment;
+                fetchData.area_as_per_the_latest_report = dbdata.area_as_per_the_latest_report;
+                fetchData.area_as_per_non_agricultural_assessment = dbdata.area_as_per_non_agricultural_assessment;
+                fetchData.plot_no = dbdata.plot_no;
+                fetchData.non_agricultural_flag = dbdata.non_agricultural_flag;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
     }
 }

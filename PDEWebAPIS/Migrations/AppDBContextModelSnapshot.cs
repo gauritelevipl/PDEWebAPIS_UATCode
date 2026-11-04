@@ -909,10 +909,25 @@ namespace PDEWebAPIS.Migrations
                         .HasColumnType("date")
                         .HasDefaultValueSql("1900-01-01");
 
+                    b.Property<string>("document_registration_date")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("document_year")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
                     b.Property<bool>("isDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
+
+                    b.Property<string>("is_there_a_development_agreement")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NO");
 
                     b.Property<string>("map_approval_order_date")
                         .HasColumnType("text");
@@ -928,6 +943,19 @@ namespace PDEWebAPIS.Migrations
 
                     b.Property<string>("occupancy_certificate_file_path")
                         .HasColumnType("text");
+
+                    b.Property<string>("occupancy_certificate_number")
+                        .HasColumnType("text");
+
+                    b.Property<string>("reg_document_no")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
+
+                    b.Property<string>("sub_registrar_office")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NA");
 
                     b.Property<string>("type_of_authority_approving_the_construction_plan")
                         .HasColumnType("text");

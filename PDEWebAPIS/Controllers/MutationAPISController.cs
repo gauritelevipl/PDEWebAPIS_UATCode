@@ -7781,10 +7781,11 @@ namespace PDEWebAPIS.Controllers
         [HttpPost]
         [Route("SaveDeclarationEntry")]
         public string SaveDeclarationEntry([FromBody] string val)
+        //DeclarationEntryInfoInputModel inputData)
         {
             try
             {
-                int UserID = 0;
+                int UserID =0;
                 var authorization = Request.Headers[HeaderNames.Authorization];
                 string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
                 if (string.IsNullOrEmpty(CallAPIForFlag))
@@ -7844,6 +7845,7 @@ namespace PDEWebAPIS.Controllers
         [HttpPost]
         [Route("GetDeclarationEntryInfo")]
         public string GetDeclarationEntryInfo([FromBody] string val)
+        //string ApplicationID)
         {
             try
             {
